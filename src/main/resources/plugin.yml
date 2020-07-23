@@ -1,0 +1,11 @@
+name: Bedwars
+version: 1.0.0
+main: me.erichards.bedwars.Bedwars
+author: erichards
+api-version: '1.15'
+softdepend: [HolographicDisplays, Citizens]
+
+commands:
+  map:
+    description: Modify maps.
+    usage: /map
