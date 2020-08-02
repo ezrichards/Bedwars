@@ -5,9 +5,7 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 /**
  * Made by Ethan Richards
@@ -19,6 +17,12 @@ public class ItemBuilder {
     private ItemMeta itemMeta;
     private Material material;
     private int amount;
+
+    public ItemBuilder(Material material) {
+        this.material = material;
+        this.itemStack = new ItemStack(material, 1);
+        this.itemMeta = itemStack.getItemMeta();
+    }
 
     public ItemBuilder(Material material, int amount) {
         this.material = material;
