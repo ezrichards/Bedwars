@@ -4,10 +4,17 @@ import com.gmail.filoghost.holographicdisplays.api.Hologram;
 import com.gmail.filoghost.holographicdisplays.api.HologramsAPI;
 import com.gmail.filoghost.holographicdisplays.api.line.TextLine;
 import me.erichards.bedwars.Bedwars;
+import me.erichards.bedwars.game.generator.Generator;
+import me.erichards.bedwars.game.generator.GeneratorType;
+import me.erichards.bedwars.game.scoreboard.GameScoreboard;
+import me.erichards.bedwars.game.scoreboard.LobbyScoreboard;
+import me.erichards.bedwars.utils.item.ItemBuilder;
+import me.erichards.bedwars.utils.world.WorldUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
 
@@ -19,7 +26,6 @@ public class Game {
 
     private static final Game instance = new Game();
     private GameState state;
-    private GameMap map;
 
     public Game() {
         this.state = GameState.LOBBY;
@@ -38,6 +44,9 @@ public class Game {
     }
 
     public void startLobby() {
+        WorldUtils.generateWorld("Lobby", World.Environment.NORMAL);
+        WorldUtils.cloneWorld("BeaconOriginal", "Beacon");
+
         int waitTime = 61; // 120
 
         for (int i = waitTime; i >= 0; --i) {
@@ -55,57 +64,50 @@ public class Game {
                         Bukkit.broadcastMessage(ChatColor.YELLOW + "Match starting in " + ChatColor.GOLD + "15" + ChatColor.YELLOW + " seconds..");
                     }
                     else if(time <= 5) {
-                        Bukkit.broadcastMessage(ChatColor.YELLOW + "Match starting in.. " + ChatColor.RED + time);
+                        Bukkit.broadcastMessage(ChatColor.YELLOW + "Match starting in " + ChatColor.RED + time + ChatColor.YELLOW + "..");
                     }
+                    Bukkit.getOnlinePlayers().forEach(player -> LobbyScoreboard.setScoreboard(player, time));
                 } else {
                     Bukkit.broadcastMessage(ChatColor.YELLOW + "Let the games begin!");
-                    setState(GameState.INGAME);
+                    setState(GameState.ACTIVE);
                     startGame();
+
+                    Bukkit.getOnlinePlayers().forEach(player -> {
+                        player.setPlayerListName(ChatColor.WHITE + "" + ChatColor.BOLD + "TEAM " + ChatColor.RESET + player.getName());
+                        player.setFoodLevel(20);
+                        player.setHealth(20);
+                        player.teleport(new Location(Bukkit.getWorld("Beacon"), 0, 63, 0));
+                    });
                 }
             }, (waitTime - i) * 20);
         }
     }
 
-    // UNUSED FOR NOW - WILL USE RANDOM MAPS
-    public void startVoting() {}
+    // UNUSED FOR NOW - WILL USE RANDOM MAPS & TEAMS
+    public void startVoting() {
+        Bukkit.getOnlinePlayers().forEach(player -> {
+            player.getInventory().addItem(new ItemBuilder(Material.NETHER_STAR, 1).setDisplayName(ChatColor.GOLD + "Vote for Map" + ChatColor.GRAY + " (Right-click)").setLore(ChatColor.GRAY + "Vote for the upcoming game's map.").build());
+        });
+    }
 
     public void startGame() {
-        Location[] ironGenerators = {
-            new Location(Bukkit.getWorld("Bedwars1"), 61.5, 65.5, 0.5),
-            new Location(Bukkit.getWorld("Bedwars1"), 0.5, 65.5, -60.5),
-            new Location(Bukkit.getWorld("Bedwars1"), -60.5, 65.5, 0.5),
-            new Location(Bukkit.getWorld("Bedwars1"), 0.5, 65.5, 61.5)
-        };
+        startGameCountdown();
 
-        Location[] diamondGenerators = {
-            new Location(Bukkit.getWorld("Bedwars1"), 42.5, 67, 42.5),
-            new Location(Bukkit.getWorld("Bedwars1"), -41.5, 67, 42.5),
-            new Location(Bukkit.getWorld("Bedwars1"), 42.5, 67, -41.5),
-            new Location(Bukkit.getWorld("Bedwars1"), -41.5, 67, -41.5)
-        };
-
-        Location[] emeraldGenerators = {
-            new Location(Bukkit.getWorld("Bedwars1"), -8.5, 70, 0.5),
-            new Location(Bukkit.getWorld("Bedwars1"), 0.5, 70, -8.5),
-            new Location(Bukkit.getWorld("Bedwars1"), 9.5, 70, 0.5),
-            new Location(Bukkit.getWorld("Bedwars1"), 0.5, 70, 9.5)
-        };
-
-        for(Location ironGenerator : ironGenerators) {
-            int ironTime = 2 * 20;
-            Bukkit.getScheduler().scheduleSyncRepeatingTask(Bedwars.getInstance(), () -> ironGenerator.getWorld().dropItem(ironGenerator.getBlock().getLocation().add(0.5, 0.5, 0.5), new ItemStack(Material.IRON_INGOT, 1)).setVelocity(new Vector(0, 0, 0)), 0, ironTime);
-
-            int goldTime = 6 * 20;
-            Bukkit.getScheduler().scheduleSyncRepeatingTask(Bedwars.getInstance(), () -> ironGenerator.getWorld().dropItem(ironGenerator.getBlock().getLocation().add(0.5, 0.5, 0.5), new ItemStack(Material.GOLD_INGOT, 1)).setVelocity(new Vector(0, 0, 0)), 0, goldTime);
+        int ironTime = 2 * 20;
+        int goldTime = 6 * 20;
+        for(Generator ironGenerator : Bedwars.getInstance().getMapManager().getGeneratorsByType(Bedwars.getInstance().getMapManager().getMapByName("Beacon"), GeneratorType.IRON)) {
+            Bukkit.getScheduler().scheduleSyncRepeatingTask(Bedwars.getInstance(), () -> ironGenerator.getLocation().getWorld().dropItem(ironGenerator.getLocation().getBlock().getLocation().add(0.5, 0.5, 0.5), new ItemStack(Material.IRON_INGOT, 1)).setVelocity(new Vector(0, 0, 0)), 0, ironTime);
+            Bukkit.getScheduler().scheduleSyncRepeatingTask(Bedwars.getInstance(), () -> ironGenerator.getLocation().getWorld().dropItem(ironGenerator.getLocation().getBlock().getLocation().add(0.5, 0.5, 0.5), new ItemStack(Material.GOLD_INGOT, 1)).setVelocity(new Vector(0, 0, 0)), 0, goldTime);
         }
 
-        for(Location diamondGenerator : diamondGenerators) {
-            Hologram hologram = HologramsAPI.createHologram(Bedwars.getInstance(), diamondGenerator);
-            TextLine generator = hologram.appendTextLine(ChatColor.DARK_AQUA + "Tier I");
+        int diamond = 30 * 20;
+        for(Generator diamondGenerator : Bedwars.getInstance().getMapManager().getGeneratorsByType(Bedwars.getInstance().getMapManager().getMapByName("Beacon"), GeneratorType.DIAMOND)) {
+            Hologram hologram = HologramsAPI.createHologram(Bedwars.getInstance(), diamondGenerator.getLocation());
+            hologram.appendTextLine(ChatColor.DARK_AQUA + "Tier I");
             //    Tier 2 every 24 seconds
             //    Tier 3 every 12 seconds
             hologram.appendTextLine(ChatColor.AQUA + "" + ChatColor.BOLD + "Diamond Generator");
-            TextLine line = hologram.appendTextLine("30");
+            TextLine line = hologram.appendTextLine("");
             hologram.appendItemLine(new ItemStack(Material.DIAMOND_BLOCK));
 
             Bukkit.getScheduler().scheduleSyncRepeatingTask(Bedwars.getInstance(), () -> {
@@ -120,14 +122,15 @@ public class Game {
                         }
                     }, (diamondTime - i) * 20);
                 }
-                diamondGenerator.getWorld().dropItem(diamondGenerator.getBlock().getLocation().add(0.5, 1, 0.5), new ItemStack(Material.DIAMOND, 1)).setVelocity(new Vector(0, 0, 0));
-            }, 0, 30 * 20); // delay not working..
+                diamondGenerator.getLocation().getWorld().dropItem(diamondGenerator.getLocation().getBlock().getLocation().add(0.5, 1, 0.5), new ItemStack(Material.DIAMOND, 1)).setVelocity(new Vector(0, 0, 0));
+            }, 0, diamond);
         }
 
-        for(Location emeraldGenerator : emeraldGenerators) {
-            Hologram hologram = HologramsAPI.createHologram(Bedwars.getInstance(), emeraldGenerator);
+        int emerald = 55 * 20;
+        for(Generator emeraldGenerator : Bedwars.getInstance().getMapManager().getGeneratorsByType(Bedwars.getInstance().getMapManager().getMapByName("Beacon"), GeneratorType.EMERALD)) {
+            Hologram hologram = HologramsAPI.createHologram(Bedwars.getInstance(), emeraldGenerator.getLocation());
             hologram.appendTextLine(ChatColor.GREEN + "" + ChatColor.BOLD + "Emerald Generator");
-            TextLine line = hologram.appendTextLine("55");
+            TextLine line = hologram.appendTextLine("");
             hologram.appendItemLine(new ItemStack(Material.EMERALD_BLOCK));
 
             Bukkit.getScheduler().scheduleSyncRepeatingTask(Bedwars.getInstance(), () -> {
@@ -142,12 +145,66 @@ public class Game {
                         }
                     }, (emeraldTime - i) * 20);
                 }
-                emeraldGenerator.getWorld().dropItem(emeraldGenerator.getBlock().getLocation().add(0.5, 1, 0.5), new ItemStack(Material.EMERALD, 1)).setVelocity(new Vector(0, 0, 0));
-            }, 0, 55 * 20);
+                emeraldGenerator.getLocation().getWorld().dropItem(emeraldGenerator.getLocation().getBlock().getLocation().add(0.5, 1, 0.5), new ItemStack(Material.EMERALD, 1)).setVelocity(new Vector(0, 0, 0));
+            }, 0, emerald);
         }
     }
 
     public void endGame() {
+        Bukkit.broadcastMessage("");
+        Bukkit.broadcastMessage("Bedwars");
+        Bukkit.broadcastMessage("");
+        Bukkit.broadcastMessage("Team Winner");
+        Bukkit.broadcastMessage("Top Kills");
+        Bukkit.broadcastMessage("Most Beds Broken");
+        Bukkit.broadcastMessage("");
 
+        Bukkit.getOnlinePlayers().forEach(player -> {
+            player.sendMessage(ChatColor.GRAY + "You are now being sent back to the lobby.");
+            player.teleport(new Location(Bukkit.getWorld("Lobby"), 0, 64, 0));
+        });
+        WorldUtils.deleteWorld("Beacon");
+//        startLobby();
+    }
+
+    /**
+     * Starts the game countdown
+     * Tier 2 Diamond Generators in 6 minutes
+     * Tier 2 Emerald Generators in 6 minutes (after diamond)
+     */
+    private void startGameCountdown() {
+        Bukkit.getScheduler().scheduleSyncRepeatingTask(Bedwars.getInstance(), () -> {
+            int time = 360;
+
+            for (int i = time; i >= 0; --i) {
+                final int countdown = i;
+
+                Bukkit.getScheduler().scheduleSyncDelayedTask(Bedwars.getInstance(), () -> {
+                    if (countdown > 0) {
+                        Bukkit.getOnlinePlayers().forEach(player -> GameScoreboard.setScoreboard(player, 0, 0, 0, countdown));
+                    }
+                    else {
+                        Bukkit.broadcastMessage("Diamond generators are now Tier II!");
+
+                        Bukkit.getScheduler().scheduleSyncRepeatingTask(Bedwars.getInstance(), () -> {
+                            int emeraldTime = 360;
+
+                            for (int emeraldI = emeraldTime; emeraldI >= 0; --emeraldI) {
+                                final int emeraldCountdown = emeraldI;
+
+                                Bukkit.getScheduler().scheduleSyncDelayedTask(Bedwars.getInstance(), () -> {
+                                    if (emeraldCountdown > 0) {
+                                        Bukkit.getOnlinePlayers().forEach(player -> GameScoreboard.setScoreboard(player, 0, 0, 0, emeraldCountdown));
+                                    }
+                                    else {
+                                        Bukkit.broadcastMessage("Emerald generators are now Tier II!");
+                                    }
+                                }, (emeraldTime - emeraldI) * 20);
+                            }
+                        }, 0, 360 * 20);
+                    }
+                }, (time - i) * 20);
+            }
+        }, 0, 360 * 20);
     }
 }

@@ -5,7 +5,5 @@ package me.erichards.bedwars.game.generator;
  * May 29, 2020
  */
 public enum GeneratorType {
-
-    IRON, DIAMOND, EMERALD;
-
+    IRON, DIAMOND, EMERALD
 }

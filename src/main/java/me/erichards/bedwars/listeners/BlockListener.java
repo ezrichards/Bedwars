@@ -1,7 +1,7 @@
 package me.erichards.bedwars.listeners;
 
 import me.erichards.bedwars.Bedwars;
-import org.bukkit.Bukkit;
+import me.erichards.bedwars.utils.Utils;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
@@ -22,7 +22,7 @@ public class BlockListener implements Listener {
     private List<Block> placedBlocks;
 
     public BlockListener() {
-        placedBlocks = new ArrayList<>();
+        this.placedBlocks = new ArrayList<>();
     }
 
     @EventHandler
@@ -30,20 +30,32 @@ public class BlockListener implements Listener {
         Block block = event.getBlock();
         Player player = event.getPlayer();
 
-        if(block.getType() == Material.YELLOW_BED || block.getType() == Material.GREEN_BED || block.getType() == Material.RED_BED || block.getType() == Material.LIGHT_BLUE_BED) {
-            Bukkit.broadcastMessage(""); // teamcolor + name
-            Bukkit.broadcastMessage(player.getName() + " broke " + block.getType().name() + "'s bed!");
-            Bukkit.broadcastMessage("");
+        switch(block.getType()) {
+            case YELLOW_BED:
+                Utils.broadcastMessage(player.getName() + " broke Yellow Team's bed!");
+                break;
+            case GREEN_BED:
+                Utils.broadcastMessage(player.getName() + " broke Green Team's bed!");
+                break;
+            case RED_BED:
+                Utils.broadcastMessage(player.getName() + " broke Red Team's bed!");
+                break;
+            case LIGHT_BLUE_BED:
+                Utils.broadcastMessage(player.getName() + " broke Blue Team's bed!");
+                break;
         }
-        else {
-//            if(placedBlocks.contains(block)) {
-//                event.setCancelled(true);
-//            }
+
+        if(!placedBlocks.contains(block)) {
+            event.setCancelled(true);
         }
     }
 
     @EventHandler
     public void onBlockPlace(BlockPlaceEvent event) {
         placedBlocks.add(event.getBlockPlaced());
+
+        if(event.getBlockPlaced().getType() == Material.TNT) {
+            // TODO auto light TNT, can't blow up map blocks or bed, only player placed blocks + knockback players w/ damage
+        }
     }
 }

@@ -1,7 +1,6 @@
 package me.erichards.bedwars.commands;
 
-import me.erichards.bedwars.Bedwars;
-import me.erichards.bedwars.game.GameMap;
+import me.erichards.bedwars.game.map.GameMap;
 import net.citizensnpcs.api.CitizensAPI;
 import net.citizensnpcs.api.npc.NPC;
 import org.bukkit.Location;
@@ -22,12 +21,9 @@ import java.util.UUID;
  */
 public class MapCommand implements CommandExecutor {
 
-    private Bedwars plugin;
     private Map<UUID, GameMap> selectedMap;
 
-    public MapCommand(Bedwars instance) {
-        this.plugin = instance;
-
+    public MapCommand() {
         this.selectedMap = new HashMap<>();
     }
 
@@ -61,21 +57,12 @@ public class MapCommand implements CommandExecutor {
 
             }
             else if(args[0].equalsIgnoreCase("add")) {
-
-                plugin.getConfig().set("maps.Beacon.itemShops.1.x", player.getLocation().getX());
-
-//                plugin.getConfig().getConfigurationSection("maps.Beacon.itemShops").createSection("1");
-                plugin.saveConfig();
-                player.sendMessage("Set successfully");
-
 //                player.getWorld().spawnEntity(player.getLocation(), NPC)
 
                 Location location = player.getLocation();
 
                 NPC npc = CitizensAPI.getNPCRegistry().createNPC(EntityType.PLAYER, "Land1401");
                 npc.spawn(player.getLocation());
-
-                // save loc as ()x|()y|()z|()yaw|()pitch - access as [0] from .split("x
             }
         }
 
@@ -85,27 +72,3 @@ public class MapCommand implements CommandExecutor {
         return true;
     }
 }
-
-//    public void createNPC(Player player, String npcName) {
-//        Location location = player.getLocation();
-//        MinecraftServer nmsServer = ((CraftServer) Bukkit.getServer()).getServer();
-//        WorldServer nmsWorld = ((CraftWorld) player.getWorld()).getHandle();
-//        GameProfile gameProfile = new GameProfile(UUID.randomUUID(), npcName);
-//
-//        String[] skin = getFromName("Bleach__");
-//        gameProfile.getProperties().put("textures", new Property("textures", skin[0], skin[1]));
-////        gameProfile.getProperties().put("textures", new Property("textures", value, signature));
-//
-//        EntityPlayer npc = new EntityPlayer(nmsServer, nmsWorld, gameProfile, new PlayerInteractManager(nmsWorld));
-//        Player npcPlayer = npc.getBukkitEntity().getPlayer();
-//        npcPlayer.setPlayerListName("");
-//
-//        npc.setLocation(location.getX(), location.getY(), location.getZ(), player.getLocation().getYaw(), player.getLocation().getPitch());
-//
-//        PlayerConnection connection = ((CraftPlayer) player).getHandle().playerConnection;
-//        connection.sendPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, npc));
-//        connection.sendPacket(new PacketPlayOutNamedEntitySpawn(npc));
-//        connection.sendPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, npc));
-//    }
-//
-

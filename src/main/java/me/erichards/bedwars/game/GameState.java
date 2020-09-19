@@ -5,5 +5,5 @@ package me.erichards.bedwars.game;
  * May 26, 2020
  */
 public enum GameState {
-    LOBBY, VOTING, INGAME, ENDED
+    LOBBY, VOTING, ACTIVE, ENDED
 }

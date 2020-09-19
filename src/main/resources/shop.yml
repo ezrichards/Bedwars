@@ -1,0 +1,107 @@
+# Item Shop Configuration
+items:
+  '1':
+    material: WHITE_WOOL
+    amount: 16
+    cost: 4
+    type: IRON
+  '2':
+    material: OAK_PLANKS
+    amount: 16
+    cost: 4
+    type: GOLD
+  '3':
+    material: END_STONE
+    amount: 12
+    cost: 24
+    type: IRON
+  '4':
+    material: STONE_SWORD
+    amount: 1
+    cost: 10
+    type: IRON
+  '5':
+    material: IRON_SWORD
+    amount: 1
+    cost: 7
+    type: GOLD
+  '6':
+    material: WOODEN_PICKAXE
+    amount: 1
+    cost: 10
+    type: IRON
+  '7':
+    material: WOODEN_AXE
+    amount: 1
+    cost: 10
+    type: IRON
+  '8':
+    material: SHEARS
+    amount: 1
+    cost: 10
+    type: IRON
+  '9':
+    material: BOW
+    amount: 1
+    cost: 12
+    type: GOLD
+  '10':
+    material: ARROW
+    amount: 8
+    cost: 4
+    type: GOLD
+  '11':
+    material: TNT
+    amount: 1
+    cost: 4
+    type: GOLD
+  '12':
+    material: LADDER
+    amount: 16
+    cost: 4
+    type: GOLD
+  '13':
+    material: FIRE_CHARGE
+    amount: 1
+    cost: 40
+    type: IRON
+  '14':
+    material: CHAINMAIL_BOOTS
+    amount: 1
+    cost: 24
+    type: IRON
+  '15':
+    material: IRON_BOOTS
+    amount: 1
+    cost: 12
+    type: GOLD
+  '16':
+    material: DIAMOND_BOOTS
+    amount: 1
+    cost: 6
+    type: EMERALD
+  '17':
+    material: ENDER_PEARL
+    amount: 1
+    cost: 4
+    type: EMERALD
+  '18':
+    material: WATER_BUCKET
+    amount: 1
+    cost: 4
+    type: GOLD
+  '19':
+    material: SPONGE
+    amount: 4
+    cost: 8
+    type: GOLD
+  '20':
+    material: GOLDEN_APPLE
+    amount: 1
+    cost: 3
+    type: GOLD
+  '21':
+    material: SNOWBALL
+    amount: 1
+    cost: 40
+    type: IRON

@@ -12,7 +12,7 @@ import java.util.*;
  */
 public class GUI {
 
-//    TODO add page support, use abstract or interface for GUIItem click, remove maps
+//    TODO add page support, use abstract or interface for GUIItem click, remove maps, maybe separate class to initialize instead of initializing on interact..inherits GUI
     public static Map<UUID, GUI> activeGUIs = new HashMap<>();
 
     private String title;

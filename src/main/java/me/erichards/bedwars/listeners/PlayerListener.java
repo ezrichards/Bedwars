@@ -1,23 +1,19 @@
 package me.erichards.bedwars.listeners;
 
-import me.erichards.bedwars.game.GameScoreboard;
-import me.erichards.bedwars.utils.ItemBuilder;
+import me.erichards.bedwars.game.Game;
+import me.erichards.bedwars.game.GameState;
 import me.erichards.bedwars.utils.Utils;
-import me.erichards.bedwars.utils.gui.GUI;
-import me.erichards.bedwars.utils.gui.GUIItem;
-import net.citizensnpcs.api.event.NPCRightClickEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.Material;
+import org.bukkit.GameMode;
+import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
-import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.scoreboard.*;
 
 /**
  * Made by Ethan Richards
@@ -26,19 +22,29 @@ import org.bukkit.scoreboard.*;
 public class PlayerListener implements Listener {
 
     @EventHandler
+    public void onFoodLevelChange(FoodLevelChangeEvent event) {
+        event.setCancelled(true);
+    }
+
+    @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
+        player.setPlayerListHeader(ChatColor.YELLOW + "" + ChatColor.BOLD + "BEDWARS");
+        player.teleport(new Location(Bukkit.getWorld("Lobby"), 0, 64, 0));
 
-        GameScoreboard.setScoreboard(player);
+        if(Game.getInstance().getState() == GameState.ACTIVE) {
+            player.sendMessage(ChatColor.RED + "You joined while the game is active, so you are now in spectator mode.");
+            player.setGameMode(GameMode.SPECTATOR);
+        }
     }
 
     @EventHandler
     public void onPlayerDeath(PlayerDeathEvent event) {
-        Player player = event.getEntity();
-
         event.setKeepInventory(true);
         event.setShouldDropExperience(false);
         event.setDeathMessage("");
+
+        Player player = event.getEntity();
 
         if(player.getLastDamageCause().getCause() == EntityDamageEvent.DamageCause.ENTITY_ATTACK) {
             Utils.broadcastMessage(player.getName() + " was killed by " + player.getKiller().getName());
@@ -59,40 +65,6 @@ public class PlayerListener implements Listener {
         }
         else {
             Utils.broadcastMessage(player.getName() + " has perished!");
-        }
-    }
-
-    @EventHandler
-    public void onNPCRightClick(NPCRightClickEvent event) {
-        Player player = event.getClicker();
-
-        if(event.getNPC().getName().contains("ITEM SHOP")) {
-            GUI itemShop = new GUI(ChatColor.YELLOW + "" + ChatColor.BOLD + "Item Shop", 6);
-
-            GUIItem item = new GUIItem(0, new ItemBuilder(Material.WHITE_WOOL, 16).setDisplayName(ChatColor.GREEN + "Wool").build()) {
-                @Override
-                public void onClick(Player player, ClickType clickType) {
-                    player.closeInventory();
-                    player.sendMessage("Yep!");
-                }
-            };
-
-            itemShop.addItem(item);
-            itemShop.open(player);
-        }
-        else if(event.getNPC().getName().contains("TEAM UPGRADES")) {
-            GUI teamUpgrades = new GUI(ChatColor.GREEN + "" + ChatColor.BOLD + "Team Upgrades", 6);
-
-            GUIItem item = new GUIItem(3, new ItemStack(Material.EMERALD)) {
-                @Override
-                public void onClick(Player player, ClickType clickType) {
-                    player.closeInventory();
-                    player.sendMessage("Yep!");
-                }
-            };
-
-            teamUpgrades.addItem(item);
-            teamUpgrades.open(player);
         }
     }
 }

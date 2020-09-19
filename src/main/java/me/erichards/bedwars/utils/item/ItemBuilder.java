@@ -1,4 +1,4 @@
-package me.erichards.bedwars.utils;
+package me.erichards.bedwars.utils.item;
 
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemFlag;

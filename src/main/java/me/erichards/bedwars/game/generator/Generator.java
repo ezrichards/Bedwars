@@ -7,7 +7,9 @@ import org.bukkit.Location;
  * May 29, 2020
  */
 public class Generator {
- // add time?
+
+    // add time?
+
     private GeneratorType type;
     private Location location;
 

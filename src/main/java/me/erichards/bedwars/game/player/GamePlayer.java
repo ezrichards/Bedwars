@@ -1,4 +1,4 @@
-package me.erichards.bedwars.game;
+package me.erichards.bedwars.game.player;
 
 import me.erichards.bedwars.game.team.Team;
 import org.bukkit.entity.Player;

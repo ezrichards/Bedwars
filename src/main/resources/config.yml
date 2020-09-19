@@ -1,32 +1,21 @@
 maps:
   Beacon:
-    gamemode: solo
-    world: 'Bedwars1'
+    type: SOLO
     maxPlayers: 4
-    diamondGenerators:
-      '1':
-        x: 42.5
-        y: 63
-        z: 42.5
-      '2':
-        x: -42.5
-        y: 63
-        z: 42.5
-      '3':
-        x: 42.5
-        y: 63
-        z: -42.5
-      '4':
-        x: -42.5
-        y: 63
-        z: -42.5
-    itemShops:
-      '1':
-        x:
-        y:
-        z:
-        yaw:
-        pitch:
+    generators:
+      - 'iron;61.5;65.5;0.5'
+      - 'iron;0.5;65.5;-60.5'
+      - 'iron;-60.5;65.5;0.5'
+      - 'iron;0.5;65.5;61.5'
+      - 'diamond;42.5;67;42.5'
+      - 'diamond;-41.5;67;42.5'
+      - 'diamond;42.5;67;-41.5'
+      - 'diamond;-41.5;67;-41.5'
+      - 'emerald;-8.5;70;0.5'
+      - 'emerald;0.5;70;-8.5'
+      - 'emerald;9.5;70;0.5'
+      - 'emerald;0.5;70;9.5'
+    itemShops: {}
     teamUpgrades: {}
     teams:
       'Red':
