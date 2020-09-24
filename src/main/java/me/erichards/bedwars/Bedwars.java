@@ -4,23 +4,27 @@ import me.erichards.bedwars.commands.MapCommand;
 import me.erichards.bedwars.commands.WorldCommand;
 import me.erichards.bedwars.game.Game;
 import me.erichards.bedwars.game.generator.Generator;
-import me.erichards.bedwars.game.generator.GeneratorType;
 import me.erichards.bedwars.game.map.GameMap;
 import me.erichards.bedwars.game.map.MapManager;
+import me.erichards.bedwars.game.shop.Shop;
+import me.erichards.bedwars.game.shop.ShopType;
+import me.erichards.bedwars.game.team.Team;
+import me.erichards.bedwars.game.team.TeamManager;
 import me.erichards.bedwars.listeners.NPCListener;
 import me.erichards.bedwars.utils.file.FileManager;
 import me.erichards.bedwars.utils.gui.GUIListener;
 import me.erichards.bedwars.listeners.BlockListener;
 import me.erichards.bedwars.listeners.PlayerListener;
-import me.erichards.bedwars.utils.world.WorldUtils;
-import org.bukkit.Bukkit;
+import me.erichards.bedwars.utils.world.LocationUtils;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
-import org.bukkit.World;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Made by Ethan Richards
@@ -31,6 +35,7 @@ public class Bedwars extends JavaPlugin {
     private static Bedwars instance;
     private FileConfiguration config;
     private MapManager mapManager;
+    private TeamManager teamManager;
 
     @Override
     public void onEnable() {
@@ -38,19 +43,31 @@ public class Bedwars extends JavaPlugin {
         saveDefaultConfig();
         config = getConfig();
         mapManager = new MapManager();
+        teamManager = new TeamManager();
+        teamManager.addTeam(new Team("Red", ChatColor.RED, false, null));
+        teamManager.addTeam(new Team("Yellow", ChatColor.YELLOW, false, null));
+        teamManager.addTeam(new Team("Green", ChatColor.GREEN, false, null));
+        teamManager.addTeam(new Team("Blue", ChatColor.AQUA, false, null));
 
         FileManager.loadFile("shop.yml");
         FileManager.loadFile("upgrades.yml");
 
         config.getConfigurationSection("maps").getKeys(false).forEach(map -> {
-            int maxPlayers = config.getInt("maps." + map + ".maxPlayers");
-            List<String> itemShops = config.getStringList("maps." + map + ".itemShops");
-            List<String> teamUpgrades = config.getStringList("maps." + map + ".teamUpgrades");
+            List<Shop> itemShops = new ArrayList<>();
+            List<Shop> teamUpgrades = new ArrayList<>();
             List<Generator> generators = new ArrayList<>();
+            Map<Team, Location> spawnLocations = new HashMap<>();
 
-            config.getStringList("maps." + map + ".generators").forEach(generator -> generators.add(parseGenerator(generator)));
+            config.getStringList("maps." + map + ".itemShops").forEach(shop -> itemShops.add(new Shop(ShopType.SHOP, LocationUtils.parseLocation(shop)))); // type is unnecessary?
+            config.getStringList("maps." + map + ".teamUpgrades").forEach(shop -> teamUpgrades.add(new Shop(ShopType.UPGRADES, LocationUtils.parseLocation(shop))));
+            config.getStringList("maps." + map + ".generators").forEach(generator -> generators.add(LocationUtils.parseGenerator(generator)));
+            config.getStringList("maps." + map + ".spawnpoints").forEach(key -> {
+                for(Map.Entry<Team, Location> spawnLocation : LocationUtils.parseSpawnpoint(key).entrySet()) {
+                    spawnLocations.put(spawnLocation.getKey(), spawnLocation.getValue());
+                }
+            });
 
-            mapManager.addMap(new GameMap(map, maxPlayers, null, null, null, generators));
+            mapManager.addMap(new GameMap(map, config.getInt("maps." + map + ".maxPlayers"), spawnLocations, itemShops, teamUpgrades, generators));
         });
 
         registerCommands();
@@ -63,12 +80,16 @@ public class Bedwars extends JavaPlugin {
         Game.getInstance().endGame();
     }
 
+    public static Bedwars getInstance() {
+        return instance;
+    }
+
     public MapManager getMapManager() {
         return mapManager;
     }
 
-    public static Bedwars getInstance() {
-        return instance;
+    public TeamManager getTeamManager() {
+        return teamManager;
     }
 
     private void registerCommands() {
@@ -81,15 +102,5 @@ public class Bedwars extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new BlockListener(), this);
         getServer().getPluginManager().registerEvents(new NPCListener(), this);
         getServer().getPluginManager().registerEvents(new GUIListener(), this);
-    }
-
-    private Generator parseGenerator(String location) {
-        String[] data = location.split(";");
-        double x = Double.parseDouble(data[1]);
-        double y = Double.parseDouble(data[2]);
-        double z = Double.parseDouble(data[3]);
-        WorldUtils.generateWorld("Beacon", World.Environment.NORMAL);
-
-        return new Generator(GeneratorType.valueOf(data[0].toUpperCase()), new Location(Bukkit.getWorld("Beacon"), x, y, z));
     }
 }

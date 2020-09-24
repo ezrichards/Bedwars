@@ -15,14 +15,18 @@ maps:
       - 'emerald;0.5;70;-8.5'
       - 'emerald;9.5;70;0.5'
       - 'emerald;0.5;70;9.5'
-    itemShops: {}
-    teamUpgrades: {}
-    teams:
-      'Red':
-        spawnpoint: ''
-      'Yellow':
-        spawnpoint: ''
-      'Green':
-        spawnpoint: ''
-      'Blue':
-        spawnpoint: ''
+    itemShops:
+      - '-55.5;66;-5.5'
+      - '6.5;66;-55.5'
+      - '56.5;66;6.5'
+      - '-5.5;66;56.5'
+    teamUpgrades:
+      - '6.5;66;56.5'
+      - '-55.5;66;6.5'
+      - '-5.5;66;-55.5'
+      - '56.5;66;-5.5'
+    spawnpoints:
+      - 'yellow;-57.5;66;0.5'
+      - 'blue;0.5;66;-57.5'
+      - 'green;58.5;66;0.5'
+      - 'red;0.5;66;58.5'

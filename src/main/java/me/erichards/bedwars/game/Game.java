@@ -6,17 +6,30 @@ import com.gmail.filoghost.holographicdisplays.api.line.TextLine;
 import me.erichards.bedwars.Bedwars;
 import me.erichards.bedwars.game.generator.Generator;
 import me.erichards.bedwars.game.generator.GeneratorType;
+import me.erichards.bedwars.game.player.GamePlayer;
 import me.erichards.bedwars.game.scoreboard.GameScoreboard;
 import me.erichards.bedwars.game.scoreboard.LobbyScoreboard;
+import me.erichards.bedwars.game.shop.Shop;
+import me.erichards.bedwars.game.team.Team;
+import me.erichards.bedwars.game.team.TeamManager;
 import me.erichards.bedwars.utils.item.ItemBuilder;
 import me.erichards.bedwars.utils.world.WorldUtils;
+import net.citizensnpcs.api.CitizensAPI;
+import net.citizensnpcs.api.npc.NPC;
+import net.citizensnpcs.trait.LookClose;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.entity.EntityType;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
 
 /**
  * Made by Ethan Richards
@@ -26,9 +39,13 @@ public class Game {
 
     private static final Game instance = new Game();
     private GameState state;
+    private List<NPC> npcs;
+    private List<GamePlayer> players;
 
     public Game() {
         this.state = GameState.LOBBY;
+        this.npcs = new ArrayList<>();
+        this.players = new ArrayList<>();
     }
 
     public static Game getInstance() {
@@ -41,6 +58,18 @@ public class Game {
 
     public void setState(GameState state) {
         this.state = state;
+    }
+
+    public List<GamePlayer> getPlayers() {
+        return players;
+    }
+
+    public void addPlayer(GamePlayer player) {
+        players.add(player);
+    }
+
+    public void removePlayer(GamePlayer player) {
+        players.remove(player);
     }
 
     public void startLobby() {
@@ -73,10 +102,15 @@ public class Game {
                     startGame();
 
                     Bukkit.getOnlinePlayers().forEach(player -> {
-                        player.setPlayerListName(ChatColor.WHITE + "" + ChatColor.BOLD + "TEAM " + ChatColor.RESET + player.getName());
                         player.setFoodLevel(20);
                         player.setHealth(20);
-                        player.teleport(new Location(Bukkit.getWorld("Beacon"), 0, 63, 0));
+                        getPlayers().forEach(gamePlayer -> {
+                            for(Map.Entry<Team, Location> spawnLocations : Bedwars.getInstance().getMapManager().getMapByName("Beacon").getSpawnLocations().entrySet()) { // Better system in the future!
+                                if(gamePlayer.getTeam().equals(spawnLocations.getKey())) {
+                                    gamePlayer.getSpigotPlayer().teleport(spawnLocations.getValue());
+                                }
+                            }
+                        });
                     });
                 }
             }, (waitTime - i) * 20);
@@ -92,6 +126,32 @@ public class Game {
 
     public void startGame() {
         startGameCountdown();
+
+        for(Shop shop : Bedwars.getInstance().getMapManager().getMapByName("Beacon").getItemShops()) {
+            NPC npc = CitizensAPI.getNPCRegistry().createNPC(EntityType.PLAYER, ChatColor.YELLOW + "" + ChatColor.BOLD + "ITEM SHOP");
+            LookClose lookClose = new LookClose();
+            lookClose.setRange(32);
+            lookClose.setRealisticLooking(true);
+            lookClose.linkToNPC(npc);
+            lookClose.toggle();
+            npc.addTrait(lookClose);
+            npc.setProtected(true);
+            npc.spawn(shop.getLocation());
+            npcs.add(npc);
+        }
+
+        for(Shop shop : Bedwars.getInstance().getMapManager().getMapByName("Beacon").getTeamUpgrades()) {
+            NPC npc = CitizensAPI.getNPCRegistry().createNPC(EntityType.PLAYER, ChatColor.YELLOW + "" + ChatColor.BOLD + "TEAM UPGRADES");
+            LookClose lookClose = new LookClose();
+            lookClose.setRange(32);
+            lookClose.setRealisticLooking(true);
+            lookClose.linkToNPC(npc);
+            lookClose.toggle();
+            npc.addTrait(lookClose);
+            npc.setProtected(true);
+            npc.spawn(shop.getLocation());
+            npcs.add(npc);
+        }
 
         int ironTime = 2 * 20;
         int goldTime = 6 * 20;
@@ -129,6 +189,7 @@ public class Game {
         int emerald = 55 * 20;
         for(Generator emeraldGenerator : Bedwars.getInstance().getMapManager().getGeneratorsByType(Bedwars.getInstance().getMapManager().getMapByName("Beacon"), GeneratorType.EMERALD)) {
             Hologram hologram = HologramsAPI.createHologram(Bedwars.getInstance(), emeraldGenerator.getLocation());
+            hologram.appendTextLine(ChatColor.DARK_GREEN + "Tier I");
             hologram.appendTextLine(ChatColor.GREEN + "" + ChatColor.BOLD + "Emerald Generator");
             TextLine line = hologram.appendTextLine("");
             hologram.appendItemLine(new ItemStack(Material.EMERALD_BLOCK));
@@ -154,7 +215,7 @@ public class Game {
         Bukkit.broadcastMessage("");
         Bukkit.broadcastMessage("Bedwars");
         Bukkit.broadcastMessage("");
-        Bukkit.broadcastMessage("Team Winner");
+        Bukkit.broadcastMessage("Winner");
         Bukkit.broadcastMessage("Top Kills");
         Bukkit.broadcastMessage("Most Beds Broken");
         Bukkit.broadcastMessage("");
@@ -163,6 +224,8 @@ public class Game {
             player.sendMessage(ChatColor.GRAY + "You are now being sent back to the lobby.");
             player.teleport(new Location(Bukkit.getWorld("Lobby"), 0, 64, 0));
         });
+
+        CitizensAPI.getNPCRegistry().deregisterAll();
         WorldUtils.deleteWorld("Beacon");
 //        startLobby();
     }

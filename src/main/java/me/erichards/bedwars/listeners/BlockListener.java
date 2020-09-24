@@ -45,14 +45,16 @@ public class BlockListener implements Listener {
                 break;
         }
 
-        if(!placedBlocks.contains(block)) {
-            event.setCancelled(true);
-        }
+//        if(!placedBlocks.contains(block)) {
+//            event.setCancelled(true);
+//        }
     }
 
     @EventHandler
     public void onBlockPlace(BlockPlaceEvent event) {
         placedBlocks.add(event.getBlockPlaced());
+
+        // cant place near generators
 
         if(event.getBlockPlaced().getType() == Material.TNT) {
             // TODO auto light TNT, can't blow up map blocks or bed, only player placed blocks + knockback players w/ damage

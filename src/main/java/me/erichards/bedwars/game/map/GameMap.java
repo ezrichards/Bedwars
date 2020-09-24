@@ -16,7 +16,7 @@ public class GameMap {
 
     private String name;
     private int maxPlayers;
-    private Map<Team, Location> spawnLocations;
+    private Map<Team, Location> spawnLocations; // move to Team as singular location?
     private List<Shop> itemShops;
     private List<Shop> teamUpgrades;
     private List<Generator> generators;

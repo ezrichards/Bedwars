@@ -33,7 +33,7 @@ public class FileManager {
                 Bedwars.getInstance().getLogger().severe("Could not create " + fileName + "!");
             }
         }
-        YamlConfiguration.loadConfiguration(file); // may be unnecessary
+        YamlConfiguration.loadConfiguration(file);
     }
 
     public static void saveFile(String fileName) {

@@ -1,7 +1,10 @@
 package me.erichards.bedwars.game.player;
 
 import me.erichards.bedwars.game.team.Team;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+
+import java.util.UUID;
 
 /**
  * Made by Ethan Richards
@@ -9,13 +12,13 @@ import org.bukkit.entity.Player;
  */
 public class GamePlayer {
 
-    private Player player;
+    private UUID player;
     private Team team;
     private int kills;
     private int finalKills;
     private int bedsBroken;
 
-    public GamePlayer(Player player, Team team, int kills, int finalKills, int bedsBroken) {
+    public GamePlayer(UUID player, Team team, int kills, int finalKills, int bedsBroken) {
         this.player = player;
         this.team = team;
         this.kills = kills;
@@ -23,8 +26,12 @@ public class GamePlayer {
         this.bedsBroken = bedsBroken;
     }
 
-    public Player getPlayer() {
+    public UUID getPlayer() {
         return player;
+    }
+
+    public Player getSpigotPlayer() {
+        return Bukkit.getPlayer(player);
     }
 
     public Team getTeam() {
