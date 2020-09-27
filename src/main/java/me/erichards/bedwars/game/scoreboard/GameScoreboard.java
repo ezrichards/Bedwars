@@ -1,5 +1,7 @@
 package me.erichards.bedwars.game.scoreboard;
 
+import me.erichards.bedwars.Bedwars;
+import me.erichards.bedwars.game.team.Team;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -27,18 +29,22 @@ public class GameScoreboard {
         objective.getScore(ChatColor.WHITE + "Final Kills: " + ChatColor.GOLD + finalKills).setScore(4);
         objective.getScore(ChatColor.WHITE + "Kills: " + ChatColor.GOLD + kills).setScore(5);
         objective.getScore(ChatColor.GOLD + "").setScore(6);
-        objective.getScore(ChatColor.YELLOW + "Y" + ChatColor.WHITE + " Yellow: ").setScore(7);
-        objective.getScore(ChatColor.AQUA + "B" + ChatColor.WHITE + " Blue: ").setScore(8);
-        objective.getScore(ChatColor.GREEN + "G" + ChatColor.WHITE + " Green: ").setScore(9);
-        objective.getScore(ChatColor.RED + "R" + ChatColor.WHITE + " Red: ").setScore(10);
+        objective.getScore(ChatColor.YELLOW + "Y" + ChatColor.WHITE + " Yellow: " + getBedIcon(Bedwars.getInstance().getTeamManager().getTeamByName("Yellow"))).setScore(7);
+        objective.getScore(ChatColor.AQUA + "B" + ChatColor.WHITE + " Blue: " + getBedIcon(Bedwars.getInstance().getTeamManager().getTeamByName("Blue"))).setScore(8);
+        objective.getScore(ChatColor.GREEN + "G" + ChatColor.WHITE + " Green: " + getBedIcon(Bedwars.getInstance().getTeamManager().getTeamByName("Green"))).setScore(9);
+        objective.getScore(ChatColor.RED + "R" + ChatColor.WHITE + " Red: " + getBedIcon(Bedwars.getInstance().getTeamManager().getTeamByName("Red"))).setScore(10);
         objective.getScore(ChatColor.YELLOW + "").setScore(11);
-        objective.getScore(ChatColor.WHITE + "Diamond II in " + ChatColor.GREEN + displayTime(countdown)).setScore(12); // Todo make this dynamic
+        objective.getScore(ChatColor.WHITE + "Diamond II in " + ChatColor.GREEN + getTime(countdown)).setScore(12); // Todo make this dynamic
         objective.getScore(ChatColor.LIGHT_PURPLE + "").setScore(13);
 
         player.setScoreboard(scoreboard);
     }
 
-    private static String displayTime(int seconds) {
+    private static String getBedIcon(Team team) {
+        return !team.isBedBroken() ? ChatColor.GREEN + "✔" : ChatColor.RED + "✘";
+    }
+
+    private static String getTime(int seconds) {
         if((TimeUnit.SECONDS.toSeconds(seconds) - TimeUnit.SECONDS.toMinutes(seconds) * 60) < 10) {
             return TimeUnit.SECONDS.toMinutes(seconds) + ":0" + (TimeUnit.SECONDS.toSeconds(seconds) - TimeUnit.SECONDS.toMinutes(seconds) * 60);
         }

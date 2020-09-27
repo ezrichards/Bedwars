@@ -18,6 +18,7 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerRespawnEvent;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -72,6 +73,8 @@ public class PlayerListener implements Listener {
         event.setDeathMessage("");
 
         Player player = event.getEntity();
+
+        // if bed is broken, cannot respawn, send to spectator mode
 
         if(player.getLastDamageCause().getCause() == EntityDamageEvent.DamageCause.ENTITY_ATTACK) {
             Utils.broadcastMessage(player.getName() + " was killed by " + player.getKiller().getName());

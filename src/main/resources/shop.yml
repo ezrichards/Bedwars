@@ -105,3 +105,8 @@ items:
     amount: 1
     cost: 40
     type: IRON
+  '22':
+    material: OBSIDIAN
+    amount: 4
+    cost: 4
+    type: EMERALD

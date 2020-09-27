@@ -1,6 +1,7 @@
 package me.erichards.bedwars.game.team;
 
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
 import java.util.List;
@@ -14,12 +15,14 @@ public class Team {
     private String name;
     private ChatColor color;
     private boolean bedBroken;
+    private Location spawnLocation;
     private List<Player> members;
 
-    public Team(String name, ChatColor color, boolean bedBroken, List<Player> members) {
+    public Team(String name, ChatColor color, boolean bedBroken, Location spawnLocation, List<Player> members) {
         this.name = name;
         this.color = color;
         this.bedBroken = bedBroken;
+        this.spawnLocation = spawnLocation;
         this.members = members;
     }
 
@@ -37,6 +40,14 @@ public class Team {
 
     public void setBedBroken(boolean bedBroken) {
         this.bedBroken = bedBroken;
+    }
+
+    public Location getSpawnLocation() {
+        return spawnLocation;
+    }
+
+    public void setSpawnLocation(Location spawnLocation) {
+        this.spawnLocation = spawnLocation;
     }
 
     public List<Player> getMembers() {

@@ -32,16 +32,14 @@ public class NPCListener implements Listener {
 
         if(event.getNPC().getName().contains("ITEM SHOP")) {
             GUI itemShop = new GUI(ChatColor.YELLOW + "" + ChatColor.BOLD + "Item Shop", 6);
-
             List<ShopItem> shopItems = new ArrayList<>();
-
             FileConfiguration shopConfig = FileManager.getConfiguration("shop.yml");
 
             shopConfig.getConfigurationSection("items").getKeys(false).forEach(item -> {
                 ItemStack displayItem = new ItemBuilder(Material.valueOf(shopConfig.getString("items." + item + ".material")), shopConfig.getInt("items." + item + ".amount"))
                         .setLore(ChatColor.GRAY + "Cost: " + ChatColor.GREEN + shopConfig.getInt("items." + item + ".cost") + " " + PayType.valueOf(shopConfig.getString("items." + item + ".type")).getName()).build();
 
-                shopItems.add(new ShopItem(displayItem, new ItemBuilder(displayItem.getType()).build(), shopConfig.getInt("items." + item + ".cost"), PayType.valueOf(shopConfig.getString("items." + item + ".type"))));
+                shopItems.add(new ShopItem(displayItem, new ItemBuilder(displayItem.getType(), shopConfig.getInt("items." + item + ".amount")).build(), shopConfig.getInt("items." + item + ".cost"), PayType.valueOf(shopConfig.getString("items." + item + ".type"))));
             });
 
             int slot = 0;

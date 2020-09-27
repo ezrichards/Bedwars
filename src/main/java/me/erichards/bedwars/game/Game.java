@@ -9,9 +9,7 @@ import me.erichards.bedwars.game.generator.GeneratorType;
 import me.erichards.bedwars.game.player.GamePlayer;
 import me.erichards.bedwars.game.scoreboard.GameScoreboard;
 import me.erichards.bedwars.game.scoreboard.LobbyScoreboard;
-import me.erichards.bedwars.game.shop.Shop;
 import me.erichards.bedwars.game.team.Team;
-import me.erichards.bedwars.game.team.TeamManager;
 import me.erichards.bedwars.utils.item.ItemBuilder;
 import me.erichards.bedwars.utils.world.WorldUtils;
 import net.citizensnpcs.api.CitizensAPI;
@@ -29,7 +27,6 @@ import org.bukkit.util.Vector;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 
 /**
  * Made by Ethan Richards
@@ -105,10 +102,8 @@ public class Game {
                         player.setFoodLevel(20);
                         player.setHealth(20);
                         getPlayers().forEach(gamePlayer -> {
-                            for(Map.Entry<Team, Location> spawnLocations : Bedwars.getInstance().getMapManager().getMapByName("Beacon").getSpawnLocations().entrySet()) { // Better system in the future!
-                                if(gamePlayer.getTeam().equals(spawnLocations.getKey())) {
-                                    gamePlayer.getSpigotPlayer().teleport(spawnLocations.getValue());
-                                }
+                            if(gamePlayer.getTeam() != null) {
+                                gamePlayer.getSpigotPlayer().teleport(gamePlayer.getTeam().getSpawnLocation());
                             }
                         });
                     });
@@ -127,7 +122,7 @@ public class Game {
     public void startGame() {
         startGameCountdown();
 
-        for(Shop shop : Bedwars.getInstance().getMapManager().getMapByName("Beacon").getItemShops()) {
+        for(Location location : Bedwars.getInstance().getMapManager().getMapByName("Beacon").getItemShops()) {
             NPC npc = CitizensAPI.getNPCRegistry().createNPC(EntityType.PLAYER, ChatColor.YELLOW + "" + ChatColor.BOLD + "ITEM SHOP");
             LookClose lookClose = new LookClose();
             lookClose.setRange(32);
@@ -136,11 +131,11 @@ public class Game {
             lookClose.toggle();
             npc.addTrait(lookClose);
             npc.setProtected(true);
-            npc.spawn(shop.getLocation());
+            npc.spawn(location);
             npcs.add(npc);
         }
 
-        for(Shop shop : Bedwars.getInstance().getMapManager().getMapByName("Beacon").getTeamUpgrades()) {
+        for(Location location : Bedwars.getInstance().getMapManager().getMapByName("Beacon").getTeamUpgrades()) {
             NPC npc = CitizensAPI.getNPCRegistry().createNPC(EntityType.PLAYER, ChatColor.YELLOW + "" + ChatColor.BOLD + "TEAM UPGRADES");
             LookClose lookClose = new LookClose();
             lookClose.setRange(32);
@@ -149,7 +144,7 @@ public class Game {
             lookClose.toggle();
             npc.addTrait(lookClose);
             npc.setProtected(true);
-            npc.spawn(shop.getLocation());
+            npc.spawn(location);
             npcs.add(npc);
         }
 
@@ -223,6 +218,7 @@ public class Game {
         Bukkit.getOnlinePlayers().forEach(player -> {
             player.sendMessage(ChatColor.GRAY + "You are now being sent back to the lobby.");
             player.teleport(new Location(Bukkit.getWorld("Lobby"), 0, 64, 0));
+            player.getInventory().clear();
         });
 
         CitizensAPI.getNPCRegistry().deregisterAll();

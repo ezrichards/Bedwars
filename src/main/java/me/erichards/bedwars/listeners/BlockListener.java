@@ -30,20 +30,29 @@ public class BlockListener implements Listener {
         Block block = event.getBlock();
         Player player = event.getPlayer();
 
-        switch(block.getType()) {
+        // get gameplayer and set their color for name below
+        // no breaking own bed
+
+        switch(block.getType()) { // remove bed drop
             case YELLOW_BED:
                 Utils.broadcastMessage(player.getName() + " broke Yellow Team's bed!");
+                Bedwars.getInstance().getTeamManager().getTeamByName("Yellow").setBedBroken(true);
                 break;
             case GREEN_BED:
                 Utils.broadcastMessage(player.getName() + " broke Green Team's bed!");
+                Bedwars.getInstance().getTeamManager().getTeamByName("Green").setBedBroken(true);
                 break;
             case RED_BED:
                 Utils.broadcastMessage(player.getName() + " broke Red Team's bed!");
+                Bedwars.getInstance().getTeamManager().getTeamByName("Red").setBedBroken(true);
                 break;
             case LIGHT_BLUE_BED:
                 Utils.broadcastMessage(player.getName() + " broke Blue Team's bed!");
+                Bedwars.getInstance().getTeamManager().getTeamByName("Blue").setBedBroken(true);
                 break;
         }
+
+        // if last bed == 1, end game
 
 //        if(!placedBlocks.contains(block)) {
 //            event.setCancelled(true);

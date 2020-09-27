@@ -17,15 +17,15 @@ import java.util.Map;
  */
 public class LocationUtils {
 
-    public static Map<Team, Location> parseSpawnpoint(String location) {
+    public static Map<String, Location> parseSpawnpoint(String location) {
         String[] data = location.split(";");
         double x = Double.parseDouble(data[1]);
         double y = Double.parseDouble(data[2]);
         double z = Double.parseDouble(data[3]);
         WorldUtils.generateWorld("Beacon", World.Environment.NORMAL);
 
-        Map<Team, Location> spawnpoint = new HashMap<>();
-        spawnpoint.put(Bedwars.getInstance().getTeamManager().getTeamByName(data[0]), new Location(Bukkit.getWorld("Beacon"), x, y, z));
+        Map<String, Location> spawnpoint = new HashMap<>();
+        spawnpoint.put(data[0], new Location(Bukkit.getWorld("Beacon"), x, y, z));
 
         return spawnpoint;
     }
