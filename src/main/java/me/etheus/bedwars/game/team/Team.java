@@ -19,11 +19,11 @@ public class Team {
     private Location spawnLocation;
     private List<Player> members;
 
-    public Team(String name, ChatColor color, Location spawnLocation) {
+    public Team(String name, ChatColor color) {
         this.name = name;
         this.color = color;
         this.bedBroken = false;
-        this.spawnLocation = spawnLocation;
+        this.spawnLocation = null;
         this.members = new ArrayList<>();
     }
 

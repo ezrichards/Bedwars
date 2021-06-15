@@ -1,6 +1,7 @@
 package me.etheus.bedwars.commands;
 
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.command.Command;
@@ -23,30 +24,40 @@ public class WorldCommand implements CommandExecutor {
 
         Player player = (Player) sender;
 
+        if(!player.isOp()) {
+            player.sendMessage(ChatColor.RED + "You do not have permission to use this command!");
+            return true;
+        }
+
         if(args.length == 0) {
             if(command.getName().equalsIgnoreCase("world")) {
-                player.sendMessage("/world <world> - Teleports to world");
-                player.sendMessage("/world list - Lists loaded worlds");
+                player.sendMessage("");
+                player.sendMessage(ChatColor.AQUA + "Worlds Utility");
+                player.sendMessage(ChatColor.GRAY + "/world <world> - teleports to a specified world.");
+                player.sendMessage(ChatColor.GRAY + "/world list - lists all loaded worlds.");
+                player.sendMessage("");
             }
         }
 
         if(args.length == 1) {
             if(args[0].equalsIgnoreCase("list")) {
-                player.sendMessage("Loaded Worlds:");
+                player.sendMessage("");
+                player.sendMessage(ChatColor.AQUA + "Loaded Worlds:");
                 for(World world : Bukkit.getServer().getWorlds()) {
-                    player.sendMessage(world.getName());
+                    player.sendMessage(ChatColor.GRAY + world.getName());
                 }
+                player.sendMessage("");
             }
             else {
                 World world = Bukkit.getWorld(args[0]);
 
                 if(world == null) {
-                    Bukkit.broadcastMessage("Null!");
+                    player.sendMessage(ChatColor.RED + "The specified world does not exist!!");
                     return true;
                 }
 
                 player.teleport(new Location(world, world.getSpawnLocation().getX(), world.getSpawnLocation().getY(), world.getSpawnLocation().getZ()));
-                player.sendMessage("Teleported!");
+                player.sendMessage(ChatColor.GRAY + "Teleported to " + ChatColor.GREEN + world.getName() + ChatColor.GRAY + "!");
             }
         }
 

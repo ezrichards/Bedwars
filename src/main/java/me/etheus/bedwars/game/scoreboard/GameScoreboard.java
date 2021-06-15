@@ -34,7 +34,7 @@ public class GameScoreboard {
         objective.getScore(ChatColor.GREEN + "G" + ChatColor.WHITE + " Green: " + getBedIcon(Bedwars.getInstance().getTeamManager().getTeamByName("Green"))).setScore(9);
         objective.getScore(ChatColor.RED + "R" + ChatColor.WHITE + " Red: " + getBedIcon(Bedwars.getInstance().getTeamManager().getTeamByName("Red"))).setScore(10);
         objective.getScore(ChatColor.YELLOW + "").setScore(11);
-        objective.getScore(ChatColor.WHITE + "Diamond II in " + ChatColor.GREEN + getTime(countdown)).setScore(12); // Todo make this dynamic
+        objective.getScore(ChatColor.WHITE + "Diamond II in " + ChatColor.GREEN + getTime(countdown)).setScore(12); // TODO make this more dynamic (w/ emeralds)
         objective.getScore(ChatColor.LIGHT_PURPLE + "").setScore(13);
 
         player.setScoreboard(scoreboard);

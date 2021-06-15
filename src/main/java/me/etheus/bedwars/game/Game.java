@@ -15,11 +15,7 @@ import me.etheus.bedwars.utils.world.WorldUtils;
 import net.citizensnpcs.api.CitizensAPI;
 import net.citizensnpcs.api.npc.NPC;
 import net.citizensnpcs.trait.LookClose;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.World;
+import org.bukkit.*;
 import org.bukkit.entity.EntityType;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
@@ -27,6 +23,7 @@ import org.bukkit.util.Vector;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * Made by Ethan Richards
@@ -36,12 +33,10 @@ public class Game {
 
     private static final Game instance = new Game();
     private GameState state;
-    private List<NPC> npcs;
     private List<GamePlayer> players;
 
     public Game() {
         this.state = GameState.LOBBY;
-        this.npcs = new ArrayList<>();
         this.players = new ArrayList<>();
     }
 
@@ -69,12 +64,28 @@ public class Game {
         players.remove(player);
     }
 
+    public GamePlayer getPlayerByUUID(UUID uuid) {
+        for(GamePlayer gamePlayer : getPlayers()) {
+            if(gamePlayer.getSpigotPlayer().getUniqueId().equals(uuid)) {
+                return gamePlayer;
+            }
+        }
+        return null;
+    }
+
+    public GamePlayer getTopKills() {
+        return null;
+    }
+
+    public GamePlayer getMostBedsBroken() {
+        return null;
+    }
+
     public void startLobby() {
         WorldUtils.generateWorld("Lobby", World.Environment.NORMAL);
         WorldUtils.cloneWorld("BeaconOriginal", "Beacon");
 
-        int waitTime = 61; // 120
-
+        int waitTime = 61; // normally 120 (2 mins)
         for (int i = waitTime; i >= 0; --i) {
             final int time = i;
 
@@ -92,7 +103,7 @@ public class Game {
                     else if(time <= 5) {
                         Bukkit.broadcastMessage(ChatColor.YELLOW + "Match starting in " + ChatColor.RED + time + ChatColor.YELLOW + "..");
                     }
-                    Bukkit.getOnlinePlayers().forEach(player -> LobbyScoreboard.setScoreboard(player, time));
+                    Bukkit.getOnlinePlayers().forEach(player -> LobbyScoreboard.setScoreboard(player, time, Bedwars.getInstance().getMapManager().getMapByName("Beacon")));
                 } else {
                     Bukkit.broadcastMessage(ChatColor.YELLOW + "Let the games begin!");
                     setState(GameState.ACTIVE);
@@ -101,6 +112,7 @@ public class Game {
                     Bukkit.getOnlinePlayers().forEach(player -> {
                         player.setFoodLevel(20);
                         player.setHealth(20);
+                        player.setGameMode(GameMode.SURVIVAL);
                         getPlayers().forEach(gamePlayer -> {
                             if(gamePlayer.getTeam() != null) {
                                 gamePlayer.getSpigotPlayer().teleport(gamePlayer.getTeam().getSpawnLocation());
@@ -132,7 +144,6 @@ public class Game {
             npc.addTrait(lookClose);
             npc.setProtected(true);
             npc.spawn(location);
-            npcs.add(npc);
         }
 
         for(Location location : Bedwars.getInstance().getMapManager().getMapByName("Beacon").getTeamUpgrades()) {
@@ -145,7 +156,6 @@ public class Game {
             npc.addTrait(lookClose);
             npc.setProtected(true);
             npc.spawn(location);
-            npcs.add(npc);
         }
 
         int ironTime = 2 * 20;
@@ -208,17 +218,18 @@ public class Game {
 
     public void endGame() {
         Bukkit.broadcastMessage("");
-        Bukkit.broadcastMessage("Bedwars");
+        Bukkit.broadcastMessage(ChatColor.YELLOW + "" + ChatColor.BOLD + "Bedwars");
         Bukkit.broadcastMessage("");
-        Bukkit.broadcastMessage("Winner");
-        Bukkit.broadcastMessage("Top Kills");
-        Bukkit.broadcastMessage("Most Beds Broken");
+        Bukkit.broadcastMessage(ChatColor.GOLD + "Winner: ");
+        Bukkit.broadcastMessage(ChatColor.GOLD + "Most Kills: ");
+        Bukkit.broadcastMessage(ChatColor.GOLD + "Most Beds Broken: ");
         Bukkit.broadcastMessage("");
 
         Bukkit.getOnlinePlayers().forEach(player -> {
             player.sendMessage(ChatColor.GRAY + "You are now being sent back to the lobby.");
             player.teleport(new Location(Bukkit.getWorld("Lobby"), 0, 64, 0));
             player.getInventory().clear();
+            player.setGameMode(GameMode.SURVIVAL);
         });
 
         CitizensAPI.getNPCRegistry().deregisterAll();
@@ -240,7 +251,11 @@ public class Game {
 
                 Bukkit.getScheduler().scheduleSyncDelayedTask(Bedwars.getInstance(), () -> {
                     if (countdown > 0) {
-                        Bukkit.getOnlinePlayers().forEach(player -> GameScoreboard.setScoreboard(player, 0, 0, 0, countdown));
+                        Bukkit.getOnlinePlayers().forEach(player -> {
+                            GamePlayer gamePlayer = getPlayerByUUID(player.getUniqueId());
+
+                            GameScoreboard.setScoreboard(player, gamePlayer.getBedsBroken(), gamePlayer.getFinalKills(), gamePlayer.getKills(), countdown);
+                        });
                     }
                     else {
                         Bukkit.broadcastMessage("Diamond generators are now Tier II!");
@@ -253,7 +268,11 @@ public class Game {
 
                                 Bukkit.getScheduler().scheduleSyncDelayedTask(Bedwars.getInstance(), () -> {
                                     if (emeraldCountdown > 0) {
-                                        Bukkit.getOnlinePlayers().forEach(player -> GameScoreboard.setScoreboard(player, 0, 0, 0, emeraldCountdown));
+                                        Bukkit.getOnlinePlayers().forEach(player -> {
+                                            GamePlayer gamePlayer = getPlayerByUUID(player.getUniqueId());
+
+                                            GameScoreboard.setScoreboard(player, gamePlayer.getBedsBroken(), gamePlayer.getFinalKills(), gamePlayer.getKills(), emeraldCountdown);
+                                        });
                                     }
                                     else {
                                         Bukkit.broadcastMessage("Emerald generators are now Tier II!");

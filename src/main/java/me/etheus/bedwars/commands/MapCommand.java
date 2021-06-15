@@ -3,6 +3,7 @@ package me.etheus.bedwars.commands;
 import me.etheus.bedwars.game.map.GameMap;
 import net.citizensnpcs.api.CitizensAPI;
 import net.citizensnpcs.api.npc.NPC;
+import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -34,6 +35,11 @@ public class MapCommand implements CommandExecutor {
         }
 
         Player player = (Player) sender;
+
+        if(!player.isOp()) {
+            player.sendMessage(ChatColor.RED + "You do not have permission to use this command!");
+            return true;
+        }
 
         if(args.length == 0) {
             if(cmd.getName().equalsIgnoreCase("map")) {

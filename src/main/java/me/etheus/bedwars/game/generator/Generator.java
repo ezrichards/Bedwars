@@ -8,8 +8,6 @@ import org.bukkit.Location;
  */
 public class Generator {
 
-    // add time?
-
     private GeneratorType type;
     private Location location;
 

@@ -41,10 +41,10 @@ public class Bedwars extends JavaPlugin {
         config = getConfig();
         mapManager = new MapManager();
         teamManager = new TeamManager();
-        teamManager.addTeam(new Team("Red", ChatColor.RED, null));
-        teamManager.addTeam(new Team("Yellow", ChatColor.YELLOW, null));
-        teamManager.addTeam(new Team("Green", ChatColor.GREEN, null));
-        teamManager.addTeam(new Team("Blue", ChatColor.AQUA, null));
+        teamManager.addTeam(new Team("Red", ChatColor.RED));
+        teamManager.addTeam(new Team("Yellow", ChatColor.YELLOW));
+        teamManager.addTeam(new Team("Green", ChatColor.GREEN));
+        teamManager.addTeam(new Team("Blue", ChatColor.AQUA));
 
         FileManager.loadFile("shop.yml");
         FileManager.loadFile("upgrades.yml");

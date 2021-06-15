@@ -1,5 +1,6 @@
 package me.etheus.bedwars.game.scoreboard;
 
+import me.etheus.bedwars.game.map.GameMap;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -13,7 +14,7 @@ import org.bukkit.scoreboard.Scoreboard;
  */
 public class LobbyScoreboard {
 
-    public static void setScoreboard(Player player, int time) {
+    public static void setScoreboard(Player player, int time, GameMap map) {
         Scoreboard scoreboard = Bukkit.getScoreboardManager().getNewScoreboard();
 
         Objective objective = scoreboard.registerNewObjective("Map", "dummy", "Map");
@@ -29,7 +30,7 @@ public class LobbyScoreboard {
         objective.getScore(ChatColor.YELLOW + "").setScore(3);
         objective.getScore(ChatColor.WHITE + "Players: " + ChatColor.GREEN + Bukkit.getOnlinePlayers().size()).setScore(4);
         objective.getScore(ChatColor.WHITE + "Mode: " + ChatColor.GREEN + "1v1v1v1").setScore(5);
-        objective.getScore(ChatColor.WHITE + "Map: " + ChatColor.GREEN + "VOTING").setScore(6);
+        objective.getScore(ChatColor.WHITE + "Map: " + ChatColor.GREEN + map.getName()).setScore(6);
         objective.getScore(ChatColor.RED + "").setScore(7);
 
         player.setScoreboard(scoreboard);

@@ -6,8 +6,8 @@ import me.etheus.bedwars.game.generator.Generator;
 import me.etheus.bedwars.game.player.GamePlayer;
 import me.etheus.bedwars.game.team.Team;
 import me.etheus.bedwars.utils.Utils;
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
@@ -25,11 +25,7 @@ import java.util.List;
  */
 public class BlockListener implements Listener {
 
-    private List<Block> placedBlocks;
-
-    public BlockListener() {
-        this.placedBlocks = new ArrayList<>();
-    }
+    private List<Block> placedBlocks = new ArrayList<>();
 
     @EventHandler
     public void onBlockBreak(BlockBreakEvent event) {
@@ -40,7 +36,7 @@ public class BlockListener implements Listener {
             if(gamePlayer.getSpigotPlayer().equals(player)) {
                 if(gamePlayer.getTeam().getColor() == ChatColor.RED && block.getType() == Material.RED_BED
                 || gamePlayer.getTeam().getColor() == ChatColor.YELLOW && block.getType() == Material.YELLOW_BED
-                || gamePlayer.getTeam().getColor() == ChatColor.GREEN && block.getType() == Material.GREEN_BED
+                || gamePlayer.getTeam().getColor() == ChatColor.GREEN && block.getType() == Material.LIME_BED
                 || gamePlayer.getTeam().getColor() == ChatColor.AQUA && block.getType() == Material.LIGHT_BLUE_BED) {
                     event.setCancelled(true);
                     player.sendMessage(ChatColor.RED + "You cannot break your own bed!");
@@ -50,36 +46,22 @@ public class BlockListener implements Listener {
                         case YELLOW_BED:
                             Utils.broadcastMessage(player.getName() + " broke Yellow Team's bed!");
                             Bedwars.getInstance().getTeamManager().getTeamByName("Yellow").setBedBroken(true);
-                            event.setDropItems(false);
                             break;
-                        case GREEN_BED:
+                        case LIME_BED:
                             Utils.broadcastMessage(player.getName() + " broke Green Team's bed!");
                             Bedwars.getInstance().getTeamManager().getTeamByName("Green").setBedBroken(true);
-                            event.setDropItems(false);
                             break;
                         case RED_BED:
                             Utils.broadcastMessage(player.getName() + " broke Red Team's bed!");
                             Bedwars.getInstance().getTeamManager().getTeamByName("Red").setBedBroken(true);
-                            event.setDropItems(false);
                             break;
                         case LIGHT_BLUE_BED:
                             Utils.broadcastMessage(player.getName() + " broke Blue Team's bed!");
                             Bedwars.getInstance().getTeamManager().getTeamByName("Blue").setBedBroken(true);
-                            event.setDropItems(false);
                             break;
                     }
-
-                    List<Team> bedsBroken = new ArrayList<>();
-                    for(Team team : Bedwars.getInstance().getTeamManager().getTeams()) {
-                        if(team.isBedBroken()) {
-                            bedsBroken.add(team);
-                        }
-                    }
-
-                    if(bedsBroken.size() == 3) {
-                        // TODO check if all players from team are dead
-                        Game.getInstance().endGame();
-                    }
+                    event.setDropItems(false);
+                    Game.getInstance().getPlayerByUUID(player.getUniqueId()).addBedBroken();
                 }
             }
         }
@@ -91,10 +73,17 @@ public class BlockListener implements Listener {
 
     @EventHandler
     public void onBlockPlace(BlockPlaceEvent event) {
-        placedBlocks.add(event.getBlockPlaced());
-
         for(Generator generator : Bedwars.getInstance().getMapManager().getMapByName("Beacon").getGenerators()) {
             // cant place near generators
+            Location location = generator.getLocation();
+
+            if(event.getBlockPlaced().getLocation().getY() == location.getY()) { // TODO better block radius check, lazy solution
+                event.getPlayer().sendMessage(ChatColor.RED + "You cannot place above the generator!");
+                event.setCancelled(true);
+            }
+            else {
+                placedBlocks.add(event.getBlockPlaced());
+            }
         }
 
         if(event.getBlockPlaced().getType() == Material.TNT) {

@@ -46,6 +46,10 @@ public class GamePlayer {
         this.kills = kills;
     }
 
+    public void addKill() {
+        this.kills++;
+    }
+
     public int getFinalKills() {
         return finalKills;
     }
@@ -54,11 +58,19 @@ public class GamePlayer {
         this.finalKills = finalKills;
     }
 
+    public void addFinalKill() {
+        this.finalKills++;
+    }
+
     public int getBedsBroken() {
         return bedsBroken;
     }
 
     public void setBedsBroken(int bedsBroken) {
         this.bedsBroken = bedsBroken;
+    }
+
+    public void addBedBroken() {
+        this.bedsBroken++;
     }
 }

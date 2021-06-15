@@ -1,9 +1,7 @@
 package me.etheus.bedwars.utils.world;
 
-import me.etheus.bedwars.Bedwars;
 import me.etheus.bedwars.game.generator.Generator;
 import me.etheus.bedwars.game.generator.GeneratorType;
-import me.etheus.bedwars.game.team.Team;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
