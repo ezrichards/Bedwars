@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>me.erichards</groupId>
+  <groupId>me.etheus</groupId>
   <artifactId>Bedwars</artifactId>
   <version>1.0.0</version>
   <build>
@@ -134,7 +134,7 @@
           <groupId>net.citizensnpcs</groupId>
         </exclusion>
         <exclusion>
-          <artifactId>citizens-v1_16_R2</artifactId>
+          <artifactId>citizens-v1_16_R3</artifactId>
           <groupId>net.citizensnpcs</groupId>
         </exclusion>
       </exclusions>
