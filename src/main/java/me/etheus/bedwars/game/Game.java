@@ -234,7 +234,7 @@ public class Game {
 
         CitizensAPI.getNPCRegistry().deregisterAll();
         WorldUtils.deleteWorld("Beacon");
-//        startLobby();
+        startLobby();
     }
 
     /**
@@ -242,7 +242,7 @@ public class Game {
      * Tier 2 Diamond Generators in 6 minutes
      * Tier 2 Emerald Generators in 6 minutes (after diamond)
      */
-    private void startGameCountdown() {
+    private void startGameCountdown() { // TODO force stop game countdowns; assign id & cancel?
         Bukkit.getScheduler().scheduleSyncRepeatingTask(Bedwars.getInstance(), () -> {
             int time = 360;
 

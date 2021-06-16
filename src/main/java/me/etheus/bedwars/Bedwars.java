@@ -3,6 +3,7 @@ package me.etheus.bedwars;
 import me.etheus.bedwars.commands.MapCommand;
 import me.etheus.bedwars.commands.WorldCommand;
 import me.etheus.bedwars.game.Game;
+import me.etheus.bedwars.game.GameState;
 import me.etheus.bedwars.game.generator.Generator;
 import me.etheus.bedwars.game.map.GameMap;
 import me.etheus.bedwars.game.map.MapManager;
@@ -72,7 +73,9 @@ public class Bedwars extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        Game.getInstance().endGame();
+        if(Game.getInstance().getState() != GameState.ENDED) {
+            Game.getInstance().endGame();
+        }
     }
 
     public static Bedwars getInstance() {

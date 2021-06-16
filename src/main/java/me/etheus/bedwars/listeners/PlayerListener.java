@@ -7,13 +7,13 @@ import me.etheus.bedwars.game.player.GamePlayer;
 import me.etheus.bedwars.game.team.Team;
 import me.etheus.bedwars.game.team.TeamManager;
 import me.etheus.bedwars.utils.Utils;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.GameMode;
-import org.bukkit.Location;
+import me.etheus.bedwars.utils.item.ItemBuilder;
+import org.bukkit.*;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
@@ -69,73 +69,85 @@ public class PlayerListener implements Listener {
     }
 
     @EventHandler
-    public void onPlayerRespawn(PlayerRespawnEvent event) {
-        Player player = event.getPlayer();
+    public void onEntityDamageByEntity(EntityDamageByEntityEvent event) {
+        if(Game.getInstance().getState() == GameState.LOBBY || Game.getInstance().getState() == GameState.ENDED) {
+            event.setCancelled(true);
+        }
 
-        if(Game.getInstance().getPlayerByUUID(player.getUniqueId()) != null) {
-            GamePlayer gamePlayer = Game.getInstance().getPlayerByUUID(player.getUniqueId());
+        if(event.getEntity() instanceof Player && event.getDamager() instanceof Player) {
+            Player player = (Player) event.getEntity();
+            Player damager = (Player) event.getDamager();
 
-            if(gamePlayer.getTeam().isBedBroken()) { // TODO teleport player back to map
+            if(event.getDamage() > player.getHealth()) {
+                GamePlayer gamePlayer = Game.getInstance().getPlayerByUUID(player.getUniqueId());
+                GamePlayer killer = Game.getInstance().getPlayerByUUID(damager.getUniqueId());
+
+                player.setHealth(20);
                 player.setGameMode(GameMode.SPECTATOR);
-                player.sendMessage(ChatColor.GRAY + "You died while your bed was broken, so you are now spectating!");;
-            }
-            else {
-                event.setRespawnLocation(gamePlayer.getTeam().getSpawnLocation());
+
+                // TODO projectile messages/better message system
+                if(gamePlayer.getTeam().isBedBroken()) {
+                    player.sendMessage(ChatColor.GRAY + "You died while your bed was broken, so you are now spectating!");
+                    killer.addFinalKill();
+                    Utils.broadcastMessage(ChatColor.AQUA + "" + ChatColor.BOLD + "FINAL KILL! " + Game.getInstance().getPlayerByUUID(player.getUniqueId()).getTeam().getColor() + player.getName() + ChatColor.GRAY +  " was killed by " + killer.getTeam().getColor() + player.getKiller().getName() + ChatColor.GRAY + "!");
+                    checkForWin();
+                }
+                else {
+                    respawnPlayer(player);
+                    killer.addKill();
+                    Utils.broadcastMessage(player.getName() + " was killed by " + killer.getSpigotPlayer().getName());
+                }
             }
         }
     }
 
-    @EventHandler
-    public void onPlayerDeath(PlayerDeathEvent event) {
-        event.setKeepInventory(true);
-        event.setShouldDropExperience(false);
-        event.setDeathMessage("");
+    // TODO rework - conflicting w/ entitydamagebyentityevent
+//    @EventHandler
+//    public void onEntityDamage(EntityDamageEvent event) {
+//        if(event.getEntity() instanceof Player) {
+//            Player player = (Player) event.getEntity();
+//            GamePlayer gamePlayer = Game.getInstance().getPlayerByUUID(player.getUniqueId());
+//
+//            if(event.getDamage() > player.getHealth()) {
+//                if(event.getCause() == EntityDamageEvent.DamageCause.FALL) {
+//                    Utils.broadcastMessage(gamePlayer.getTeam().getColor() + player.getName() + ChatColor.GRAY + " took too big of a fall!");
+//                }
+//                else if(event.getCause() == EntityDamageEvent.DamageCause.VOID) {
+//                    Utils.broadcastMessage(gamePlayer.getTeam().getColor() + player.getName() + ChatColor.GRAY + " has fallen into the void!");
+//                }
+//                else {
+//                    Utils.broadcastMessage(gamePlayer.getTeam().getColor() + player.getName() + ChatColor.GRAY + " has perished!");
+//                }
+//
+//                player.setHealth(20);
+//                player.setGameMode(GameMode.SPECTATOR);
+//
+//                if(gamePlayer.getTeam().isBedBroken()) {
+//                    player.sendMessage(ChatColor.GRAY + "You died while your bed was broken, so you are now spectating!");
+//                    checkForWin();
+//                }
+//                else {
+//                    respawnPlayer(player);
+//                }
+//            }
+//        }
+//    }
 
-        Player player = event.getEntity();
+    private void respawnPlayer(Player player) {
+        GamePlayer gamePlayer = Game.getInstance().getPlayerByUUID(player.getUniqueId());
 
-        if(Game.getInstance().getPlayerByUUID(player.getUniqueId()).getTeam().isBedBroken()) { // TODO may not be necessary..also TODO respawn timer system
-            player.setGameMode(GameMode.SPECTATOR);
-            player.sendMessage(ChatColor.GRAY + "You died while your bed was broken, so you are now spectating!");
-        }
+        Bukkit.getScheduler().runTaskLater(Bedwars.getInstance(), () -> {
+            player.setGameMode(GameMode.SURVIVAL);
+            player.teleport(gamePlayer.getTeam().getSpawnLocation());
+            player.setHealth(20);
+            player.getInventory().setHelmet(new ItemBuilder(Material.LEATHER_HELMET).build()); // TODO dye this armor or check for upgrades
+            player.getInventory().setChestplate(new ItemBuilder(Material.LEATHER_CHESTPLATE).build());
+            player.getInventory().setLeggings(new ItemBuilder(Material.LEATHER_LEGGINGS).build());
+            player.getInventory().setBoots(new ItemBuilder(Material.LEATHER_BOOTS).build());
+        }, 5 * 20);
+    }
 
-        if(player.getLastDamageCause().getCause() == EntityDamageEvent.DamageCause.ENTITY_ATTACK) {
-            if(player.getKiller() != null) {
-                if(Game.getInstance().getPlayerByUUID(player.getUniqueId()).getTeam().isBedBroken()) {
-                    GamePlayer killer = Game.getInstance().getPlayerByUUID(player.getKiller().getUniqueId());
-                    killer.addFinalKill();
-                    Utils.broadcastMessage(ChatColor.AQUA + "" + ChatColor.BOLD + "FINAL KILL! " + Game.getInstance().getPlayerByUUID(player.getUniqueId()).getTeam().getColor() + player.getName() + ChatColor.GRAY +  " was killed by " + killer.getTeam().getColor() + player.getKiller().getName() + ChatColor.GRAY + "!");
-                }
-                else {
-                    Game.getInstance().getPlayerByUUID(player.getKiller().getUniqueId()).addKill();
-                    Utils.broadcastMessage(player.getName() + " was killed by " + player.getKiller().getName());
-                }
-            }
-        }
-        else if(player.getLastDamageCause().getCause() == EntityDamageEvent.DamageCause.FALL) {
-            Utils.broadcastMessage(player.getName() + " took too big of a fall!");
-        }
-        else if(player.getLastDamageCause().getCause() == EntityDamageEvent.DamageCause.PROJECTILE) {
-            if(player.getKiller() != null) {
-                if(Game.getInstance().getPlayerByUUID(player.getUniqueId()).getTeam().isBedBroken()) {
-                    Game.getInstance().getPlayerByUUID(player.getKiller().getUniqueId()).addFinalKill();
-                    Utils.broadcastMessage("FINAL KILL! " + player.getName() + " was shot by " + player.getKiller().getName());
-                }
-                else {
-                    Game.getInstance().getPlayerByUUID(player.getKiller().getUniqueId()).addKill();
-                    Utils.broadcastMessage(player.getName() + " was shot by " + player.getKiller().getName());
-                }
-            }
-            else {
-                Utils.broadcastMessage(player.getName() + " got shot with a projectile!");
-            }
-        }
-        else if(player.getLastDamageCause().getCause() == EntityDamageEvent.DamageCause.VOID) {
-            Utils.broadcastMessage(player.getName() + " has fallen into the void!");
-        }
-        else {
-            Utils.broadcastMessage(player.getName() + " has perished!");
-        }
-
+    private void checkForWin() {
         for(Team team : Bedwars.getInstance().getTeamManager().getTeams()) {
             if(team.isBedBroken()) {
                 int deadCount = 0;

@@ -44,41 +44,40 @@ public class BlockListener implements Listener {
                 else {
                     switch(block.getType()) {
                         case YELLOW_BED:
-                            Utils.broadcastMessage(player.getName() + " broke Yellow Team's bed!");
+                            Utils.broadcastMessage(gamePlayer.getTeam().getColor() + player.getName() + ChatColor.GRAY + " broke Yellow Team's bed!");
                             Bedwars.getInstance().getTeamManager().getTeamByName("Yellow").setBedBroken(true);
                             break;
                         case LIME_BED:
-                            Utils.broadcastMessage(player.getName() + " broke Green Team's bed!");
+                            Utils.broadcastMessage(gamePlayer.getTeam().getColor() + player.getName() + ChatColor.GRAY + " broke Green Team's bed!");
                             Bedwars.getInstance().getTeamManager().getTeamByName("Green").setBedBroken(true);
                             break;
                         case RED_BED:
-                            Utils.broadcastMessage(player.getName() + " broke Red Team's bed!");
+                            Utils.broadcastMessage(gamePlayer.getTeam().getColor() + player.getName() + ChatColor.GRAY + " broke Red Team's bed!");
                             Bedwars.getInstance().getTeamManager().getTeamByName("Red").setBedBroken(true);
                             break;
                         case LIGHT_BLUE_BED:
-                            Utils.broadcastMessage(player.getName() + " broke Blue Team's bed!");
+                            Utils.broadcastMessage(gamePlayer.getTeam().getColor() + player.getName() + ChatColor.GRAY + " broke Blue Team's bed!");
                             Bedwars.getInstance().getTeamManager().getTeamByName("Blue").setBedBroken(true);
                             break;
                     }
                     event.setDropItems(false);
-                    Game.getInstance().getPlayerByUUID(player.getUniqueId()).addBedBroken();
+                    gamePlayer.addBedBroken();
                 }
             }
         }
 
-//        if(!placedBlocks.contains(block)) {
-//            event.setCancelled(true);
-//        }
+        if(!placedBlocks.contains(block)) {
+            event.setCancelled(true);
+        }
     }
 
     @EventHandler
     public void onBlockPlace(BlockPlaceEvent event) {
         for(Generator generator : Bedwars.getInstance().getMapManager().getMapByName("Beacon").getGenerators()) {
-            // cant place near generators
             Location location = generator.getLocation();
 
             if(event.getBlockPlaced().getLocation().getY() == location.getY()) { // TODO better block radius check, lazy solution
-                event.getPlayer().sendMessage(ChatColor.RED + "You cannot place above the generator!");
+                event.getPlayer().sendMessage(ChatColor.RED + "You cannot place blocks near the generator!");
                 event.setCancelled(true);
             }
             else {
