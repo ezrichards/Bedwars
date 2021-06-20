@@ -5,20 +5,16 @@ import me.etheus.bedwars.game.Game;
 import me.etheus.bedwars.game.GameState;
 import me.etheus.bedwars.game.player.GamePlayer;
 import me.etheus.bedwars.game.team.Team;
-import me.etheus.bedwars.game.team.TeamManager;
 import me.etheus.bedwars.utils.Utils;
 import me.etheus.bedwars.utils.item.ItemBuilder;
 import org.bukkit.*;
-import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
-import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerRespawnEvent;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,11 +26,7 @@ import java.util.Random;
  */
 public class PlayerListener implements Listener {
 
-    private List<Team> availableTeams;
-
-    public PlayerListener() {
-        availableTeams = new ArrayList<>(Bedwars.getInstance().getTeamManager().getTeams());
-    }
+    private final List<Team> availableTeams = new ArrayList<>(Bedwars.getInstance().getTeamManager().getTeams());
 
     @EventHandler
     public void onFoodLevelChange(FoodLevelChangeEvent event) {
@@ -57,8 +49,7 @@ public class PlayerListener implements Listener {
             Team team = availableTeams.get(new Random().nextInt(availableTeams.size()));
             availableTeams.remove(team);
 
-            GamePlayer gamePlayer = new GamePlayer(player.getUniqueId(), team, 0, 0, 0);
-            Game.getInstance().addPlayer(gamePlayer);
+            Game.getInstance().addPlayer(new GamePlayer(player.getUniqueId(), team));
 
             player.setPlayerListName(team.getColor() + "" + ChatColor.BOLD + team.getName().charAt(0) + " " + ChatColor.RESET + team.getColor() + player.getName());
         }
@@ -85,53 +76,68 @@ public class PlayerListener implements Listener {
                 player.setHealth(20);
                 player.setGameMode(GameMode.SPECTATOR);
 
-                // TODO projectile messages/better message system
+                sendDeathMessage(gamePlayer, killer, event.getCause());
+
                 if(gamePlayer.getTeam().isBedBroken()) {
                     player.sendMessage(ChatColor.GRAY + "You died while your bed was broken, so you are now spectating!");
                     killer.addFinalKill();
-                    Utils.broadcastMessage(ChatColor.AQUA + "" + ChatColor.BOLD + "FINAL KILL! " + Game.getInstance().getPlayerByUUID(player.getUniqueId()).getTeam().getColor() + player.getName() + ChatColor.GRAY +  " was killed by " + killer.getTeam().getColor() + player.getKiller().getName() + ChatColor.GRAY + "!");
                     checkForWin();
                 }
                 else {
                     respawnPlayer(player);
                     killer.addKill();
-                    Utils.broadcastMessage(player.getName() + " was killed by " + killer.getSpigotPlayer().getName());
                 }
             }
         }
     }
 
-    // TODO rework - conflicting w/ entitydamagebyentityevent
-//    @EventHandler
-//    public void onEntityDamage(EntityDamageEvent event) {
-//        if(event.getEntity() instanceof Player) {
-//            Player player = (Player) event.getEntity();
-//            GamePlayer gamePlayer = Game.getInstance().getPlayerByUUID(player.getUniqueId());
-//
-//            if(event.getDamage() > player.getHealth()) {
-//                if(event.getCause() == EntityDamageEvent.DamageCause.FALL) {
-//                    Utils.broadcastMessage(gamePlayer.getTeam().getColor() + player.getName() + ChatColor.GRAY + " took too big of a fall!");
-//                }
-//                else if(event.getCause() == EntityDamageEvent.DamageCause.VOID) {
-//                    Utils.broadcastMessage(gamePlayer.getTeam().getColor() + player.getName() + ChatColor.GRAY + " has fallen into the void!");
-//                }
-//                else {
-//                    Utils.broadcastMessage(gamePlayer.getTeam().getColor() + player.getName() + ChatColor.GRAY + " has perished!");
-//                }
-//
-//                player.setHealth(20);
-//                player.setGameMode(GameMode.SPECTATOR);
-//
-//                if(gamePlayer.getTeam().isBedBroken()) {
-//                    player.sendMessage(ChatColor.GRAY + "You died while your bed was broken, so you are now spectating!");
-//                    checkForWin();
-//                }
-//                else {
-//                    respawnPlayer(player);
-//                }
-//            }
-//        }
-//    }
+    @EventHandler
+    public void onEntityDamage(EntityDamageEvent event) {
+        if (event.getEntity() instanceof Player && event.getCause() != EntityDamageEvent.DamageCause.ENTITY_ATTACK && event.getCause() != EntityDamageEvent.DamageCause.PROJECTILE) { // TODO better damagecause and dont pass in null
+            Player player = (Player) event.getEntity();
+            GamePlayer gamePlayer = Game.getInstance().getPlayerByUUID(player.getUniqueId());
+
+            if (event.getDamage() > player.getHealth()) {
+                sendDeathMessage(gamePlayer, null, event.getCause());
+
+                player.teleport(gamePlayer.getTeam().getSpawnLocation());
+                player.setHealth(20);
+                player.setGameMode(GameMode.SPECTATOR);
+
+                if (gamePlayer.getTeam().isBedBroken()) {
+                    player.sendMessage(ChatColor.GRAY + "You died while your bed was broken, so you are now spectating!");
+                    checkForWin();
+                } else {
+                    respawnPlayer(player);
+                }
+            }
+        }
+    }
+
+    private void sendDeathMessage(GamePlayer player, GamePlayer killer, EntityDamageEvent.DamageCause damageCause) {
+        String deathMessage = "";
+        if(player.getTeam().isBedBroken()) {
+            deathMessage += ChatColor.AQUA + "" + ChatColor.BOLD + "FINAL KILL! ";
+        }
+
+        if(damageCause == EntityDamageEvent.DamageCause.ENTITY_ATTACK) {
+            deathMessage += player.getTeam().getColor() + player.getSpigotPlayer().getName() + ChatColor.GRAY + " was killed by " + killer.getTeam().getColor() + killer.getSpigotPlayer().getName() + ChatColor.GRAY + "!";
+        }
+        else if(damageCause == EntityDamageEvent.DamageCause.PROJECTILE) {
+            deathMessage += player.getTeam().getColor() + player.getSpigotPlayer().getName() + ChatColor.GRAY + " was shot by " + killer.getTeam().getColor() + killer.getSpigotPlayer().getName() + ChatColor.GRAY + "!";
+        }
+        else if(damageCause == EntityDamageEvent.DamageCause.FALL) {
+            deathMessage += player.getTeam().getColor() + player.getSpigotPlayer().getName() + ChatColor.GRAY + " took too big of a fall!";
+        }
+        else if(damageCause == EntityDamageEvent.DamageCause.VOID) {
+            deathMessage += player.getTeam().getColor() + player.getSpigotPlayer().getName() + ChatColor.GRAY + " has fallen into the void!";
+        }
+        else {
+            deathMessage += player.getTeam().getColor() + player.getSpigotPlayer().getName() + ChatColor.GRAY + " has perished!";
+        }
+
+        Utils.broadcastMessage(deathMessage);
+    }
 
     private void respawnPlayer(Player player) {
         GamePlayer gamePlayer = Game.getInstance().getPlayerByUUID(player.getUniqueId());

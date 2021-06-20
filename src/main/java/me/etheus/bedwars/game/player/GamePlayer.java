@@ -18,12 +18,12 @@ public class GamePlayer {
     private int finalKills;
     private int bedsBroken;
 
-    public GamePlayer(UUID player, Team team, int kills, int finalKills, int bedsBroken) {
+    public GamePlayer(UUID player, Team team) {
         this.player = player;
         this.team = team;
-        this.kills = kills;
-        this.finalKills = finalKills;
-        this.bedsBroken = bedsBroken;
+        this.kills = 0;
+        this.finalKills = 0;
+        this.bedsBroken = 0;
     }
 
     public UUID getPlayer() {
