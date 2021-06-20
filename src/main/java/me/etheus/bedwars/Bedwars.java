@@ -73,9 +73,7 @@ public class Bedwars extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        if(Game.getInstance().getState() != GameState.ENDED) {
-            Game.getInstance().endGame();
-        }
+        Game.getInstance().endGame();
     }
 
     public static Bedwars getInstance() {

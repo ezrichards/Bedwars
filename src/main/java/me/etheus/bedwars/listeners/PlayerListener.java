@@ -15,6 +15,7 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerMoveEvent;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -60,6 +61,21 @@ public class PlayerListener implements Listener {
     }
 
     @EventHandler
+    public void onPlayerMove(PlayerMoveEvent event) {
+        Player player = event.getPlayer();
+        if(event.getPlayer().getLocation().getY() < 0) {
+            GamePlayer gamePlayer = Game.getInstance().getPlayerByUUID(player.getUniqueId());
+
+            player.teleport(gamePlayer.getTeam().getSpawnLocation());
+            player.setHealth(20);
+            player.setGameMode(GameMode.SPECTATOR);
+
+            sendDeathMessage(gamePlayer, null, EntityDamageEvent.DamageCause.VOID);
+            respawnPlayer(player);
+        }
+    }
+
+    @EventHandler
     public void onEntityDamageByEntity(EntityDamageByEntityEvent event) {
         if(Game.getInstance().getState() == GameState.LOBBY || Game.getInstance().getState() == GameState.ENDED) {
             event.setCancelled(true);
@@ -93,7 +109,7 @@ public class PlayerListener implements Listener {
 
     @EventHandler
     public void onEntityDamage(EntityDamageEvent event) {
-        if (event.getEntity() instanceof Player && event.getCause() != EntityDamageEvent.DamageCause.ENTITY_ATTACK && event.getCause() != EntityDamageEvent.DamageCause.PROJECTILE) { // TODO better damagecause and dont pass in null
+        if (event.getEntity() instanceof Player && event.getCause() != EntityDamageEvent.DamageCause.ENTITY_ATTACK && event.getCause() != EntityDamageEvent.DamageCause.PROJECTILE) {
             Player player = (Player) event.getEntity();
             GamePlayer gamePlayer = Game.getInstance().getPlayerByUUID(player.getUniqueId());
 

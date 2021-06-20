@@ -5,15 +5,21 @@ import me.etheus.bedwars.game.Game;
 import me.etheus.bedwars.game.generator.Generator;
 import me.etheus.bedwars.game.player.GamePlayer;
 import me.etheus.bedwars.utils.Utils;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.TNTPrimed;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockExplodeEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.entity.EntityExplodeEvent;
+import org.bukkit.event.player.PlayerMoveEvent;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,21 +51,24 @@ public class BlockListener implements Listener {
                 case YELLOW_BED:
                     Utils.broadcastMessage(gamePlayer.getTeam().getColor() + player.getName() + ChatColor.GRAY + " broke Yellow Team's bed!");
                     Bedwars.getInstance().getTeamManager().getTeamByName("Yellow").setBedBroken(true);
+                    event.setDropItems(false);
                     break;
                 case LIME_BED:
                     Utils.broadcastMessage(gamePlayer.getTeam().getColor() + player.getName() + ChatColor.GRAY + " broke Green Team's bed!");
                     Bedwars.getInstance().getTeamManager().getTeamByName("Green").setBedBroken(true);
+                    event.setDropItems(false);
                     break;
                 case RED_BED:
                     Utils.broadcastMessage(gamePlayer.getTeam().getColor() + player.getName() + ChatColor.GRAY + " broke Red Team's bed!");
                     Bedwars.getInstance().getTeamManager().getTeamByName("Red").setBedBroken(true);
+                    event.setDropItems(false);
                     break;
                 case LIGHT_BLUE_BED:
                     Utils.broadcastMessage(gamePlayer.getTeam().getColor() + player.getName() + ChatColor.GRAY + " broke Blue Team's bed!");
                     Bedwars.getInstance().getTeamManager().getTeamByName("Blue").setBedBroken(true);
+                    event.setDropItems(false);
                     break;
             }
-            event.setDropItems(false);
             gamePlayer.addBedBroken();
         }
 
@@ -70,20 +79,23 @@ public class BlockListener implements Listener {
 
     @EventHandler
     public void onBlockPlace(BlockPlaceEvent event) {
-        for(Generator generator : Bedwars.getInstance().getMapManager().getMapByName("Beacon").getGenerators()) {
-            Location location = generator.getLocation();
-
-            if(event.getBlockPlaced().getLocation().getY() == location.getY()) { // TODO better block radius check, lazy solution
-                event.getPlayer().sendMessage(ChatColor.RED + "You cannot place blocks near the generator!");
-                event.setCancelled(true);
-            }
-            else {
-                placedBlocks.add(event.getBlockPlaced());
-            }
-        }
+        placedBlocks.add(event.getBlockPlaced());
 
         if(event.getBlockPlaced().getType() == Material.TNT) {
-            // TODO auto light TNT, can't blow up map blocks or bed, only player placed blocks + knockback players w/ damage
+            event.getBlockPlaced().setType(Material.AIR);
+            event.getBlockPlaced().getLocation().getWorld().spawn(event.getBlockPlaced().getLocation().add(0.5, 0.5, 0.5), TNTPrimed.class);
+        }
+    }
+
+    @EventHandler // TODO work on TNT explode, this solution isn't good
+    public void onEntityExplode(EntityExplodeEvent event) {
+        for(Block explodedBlock : event.blockList()) {
+            for(Block placedBlock : placedBlocks) {
+                if(explodedBlock != placedBlock) {
+                    Bukkit.broadcastMessage("yes!");
+                    event.setCancelled(true);
+                }
+            }
         }
     }
 }
