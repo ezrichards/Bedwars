@@ -47,28 +47,23 @@ public class BlockListener implements Listener {
             player.sendMessage(ChatColor.RED + "You cannot break your own bed!");
         }
         else {
-            switch(block.getType()) {
-                case YELLOW_BED:
-                    Utils.broadcastMessage(gamePlayer.getTeam().getColor() + player.getName() + ChatColor.GRAY + " broke Yellow Team's bed!");
-                    Bedwars.getInstance().getTeamManager().getTeamByName("Yellow").setBedBroken(true);
-                    event.setDropItems(false);
-                    break;
-                case LIME_BED:
-                    Utils.broadcastMessage(gamePlayer.getTeam().getColor() + player.getName() + ChatColor.GRAY + " broke Green Team's bed!");
-                    Bedwars.getInstance().getTeamManager().getTeamByName("Green").setBedBroken(true);
-                    event.setDropItems(false);
-                    break;
-                case RED_BED:
-                    Utils.broadcastMessage(gamePlayer.getTeam().getColor() + player.getName() + ChatColor.GRAY + " broke Red Team's bed!");
-                    Bedwars.getInstance().getTeamManager().getTeamByName("Red").setBedBroken(true);
-                    event.setDropItems(false);
-                    break;
-                case LIGHT_BLUE_BED:
-                    Utils.broadcastMessage(gamePlayer.getTeam().getColor() + player.getName() + ChatColor.GRAY + " broke Blue Team's bed!");
-                    Bedwars.getInstance().getTeamManager().getTeamByName("Blue").setBedBroken(true);
-                    event.setDropItems(false);
-                    break;
+            if(block.getType() == Material.YELLOW_BED) {
+                Utils.broadcastMessage(gamePlayer.getTeam().getColor() + player.getName() + ChatColor.GRAY + " broke Yellow Team's bed!");
+                Bedwars.getInstance().getTeamManager().getTeamByName("Yellow").setBedBroken(true);
             }
+            else if(block.getType() == Material.LIME_BED) {
+                Utils.broadcastMessage(gamePlayer.getTeam().getColor() + player.getName() + ChatColor.GRAY + " broke Green Team's bed!");
+                Bedwars.getInstance().getTeamManager().getTeamByName("Green").setBedBroken(true);
+            }
+            else if(block.getType() == Material.RED_BED) {
+                Utils.broadcastMessage(gamePlayer.getTeam().getColor() + player.getName() + ChatColor.GRAY + " broke Red Team's bed!");
+                Bedwars.getInstance().getTeamManager().getTeamByName("Red").setBedBroken(true);
+            }
+            else if(block.getType() == Material.LIGHT_BLUE_BED) {
+                Utils.broadcastMessage(gamePlayer.getTeam().getColor() + player.getName() + ChatColor.GRAY + " broke Blue Team's bed!");
+                Bedwars.getInstance().getTeamManager().getTeamByName("Blue").setBedBroken(true);
+            }
+            event.setDropItems(false);
             gamePlayer.addBedBroken();
         }
 

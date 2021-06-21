@@ -21,6 +21,7 @@ import net.citizensnpcs.api.npc.NPC;
 import net.citizensnpcs.trait.LookClose;
 import org.bukkit.*;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
 
@@ -119,6 +120,32 @@ public class Game {
         return null;
     }
 
+    /**
+     * Respawn the specified player.
+     * @param player Player to respawn
+     * @param auto Whether or not to do it automatically
+     *             (useful if spawning for the first time)
+     */
+    public void respawnPlayer(Player player, boolean auto) {
+        GamePlayer gamePlayer = Game.getInstance().getPlayerByUUID(player.getUniqueId());
+
+        int time = 5 * 20;
+        if(auto) {
+            time = 0;
+        }
+
+        Bukkit.getScheduler().runTaskLater(Bedwars.getInstance(), () -> {
+            player.setGameMode(GameMode.SURVIVAL);
+            player.teleport(gamePlayer.getTeam().getSpawnLocation());
+            player.setHealth(20);
+            player.setFoodLevel(20);
+            player.getInventory().setHelmet(new ItemBuilder(Material.LEATHER_HELMET).build()); // TODO dye this armor or check for upgrades
+            player.getInventory().setChestplate(new ItemBuilder(Material.LEATHER_CHESTPLATE).build());
+            player.getInventory().setLeggings(new ItemBuilder(Material.LEATHER_LEGGINGS).build());
+            player.getInventory().setBoots(new ItemBuilder(Material.LEATHER_BOOTS).build());
+        }, time);
+    }
+
     public void startLobby() {
         WorldUtils.generateWorld("Lobby", World.Environment.NORMAL);
         WorldUtils.cloneWorld("BeaconOriginal", "Beacon");
@@ -150,15 +177,10 @@ public class Game {
                             setState(GameState.ACTIVE);
                             startGame();
 
-                            Bukkit.getOnlinePlayers().forEach(player -> {
-                                player.setFoodLevel(20);
-                                player.setHealth(20);
-                                player.setGameMode(GameMode.SURVIVAL);
-                                getPlayers().forEach(gamePlayer -> {
-                                    if (gamePlayer.getTeam() != null) {
-                                        gamePlayer.getSpigotPlayer().teleport(gamePlayer.getTeam().getSpawnLocation());
-                                    }
-                                });
+                            players.forEach(player -> {
+                                if (player.getTeam() != null) {
+                                    respawnPlayer(player.getSpigotPlayer(), true);
+                                }
                             });
                         }
                         else {
@@ -168,6 +190,7 @@ public class Game {
                     }
                 }
             };
+            delayedTasks.add(delayedTask);
         }
     }
 

@@ -71,7 +71,7 @@ public class PlayerListener implements Listener {
             player.setGameMode(GameMode.SPECTATOR);
 
             sendDeathMessage(gamePlayer, null, EntityDamageEvent.DamageCause.VOID);
-            respawnPlayer(player);
+            Game.getInstance().respawnPlayer(player, false);
         }
     }
 
@@ -100,7 +100,7 @@ public class PlayerListener implements Listener {
                     checkForWin();
                 }
                 else {
-                    respawnPlayer(player);
+                    Game.getInstance().respawnPlayer(player, false);
                     killer.addKill();
                 }
             }
@@ -124,7 +124,7 @@ public class PlayerListener implements Listener {
                     player.sendMessage(ChatColor.GRAY + "You died while your bed was broken, so you are now spectating!");
                     checkForWin();
                 } else {
-                    respawnPlayer(player);
+                    Game.getInstance().respawnPlayer(player, false);
                 }
             }
         }
@@ -153,20 +153,6 @@ public class PlayerListener implements Listener {
         }
 
         Utils.broadcastMessage(deathMessage);
-    }
-
-    private void respawnPlayer(Player player) {
-        GamePlayer gamePlayer = Game.getInstance().getPlayerByUUID(player.getUniqueId());
-
-        Bukkit.getScheduler().runTaskLater(Bedwars.getInstance(), () -> {
-            player.setGameMode(GameMode.SURVIVAL);
-            player.teleport(gamePlayer.getTeam().getSpawnLocation());
-            player.setHealth(20);
-            player.getInventory().setHelmet(new ItemBuilder(Material.LEATHER_HELMET).build()); // TODO dye this armor or check for upgrades
-            player.getInventory().setChestplate(new ItemBuilder(Material.LEATHER_CHESTPLATE).build());
-            player.getInventory().setLeggings(new ItemBuilder(Material.LEATHER_LEGGINGS).build());
-            player.getInventory().setBoots(new ItemBuilder(Material.LEATHER_BOOTS).build());
-        }, 5 * 20);
     }
 
     private void checkForWin() {
