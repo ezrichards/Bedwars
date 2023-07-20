@@ -1,8 +1,8 @@
 name: Bedwars
 version: 1.0.0
-main: me.etheus.bedwars.Bedwars
-author: Etheus
-api-version: '1.16'
+main: me.ezrichards.bedwars.Bedwars
+author: ezrichards
+api-version: '1.20'
 softdepend: [HolographicDisplays, Citizens]
 
 commands:
